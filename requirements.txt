@@ -1,0 +1,2 @@
+hashutils==0.0.3
+pycryptodomex==3.9.7
