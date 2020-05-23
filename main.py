@@ -21,7 +21,10 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
   Mention which libraries you used.
 """
 
-
+if __name__ == '__main__':
+    blockchain = Scrooge()
+    blockchain.run()
+    
 # General Notes
 
 #------ TODO
@@ -46,19 +49,13 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 
 #  Deliverables
 
-# ❖ A designated entity “Scrooge” publishes an append-only ledger that
-# contains all the history of transactions.
-# ❖ The ledger is a blockchain, where each block contains transactions,
-# its ID, the hash of the block, and a hash pointer to the previous block.
-# The final hash pointer is signed by Scrooge.
+
+#  ---- Some distributed over files
+
 # ❖ A simulation of the network, with multiple users and the randomized
 # process of making a transaction, making each transaction reach an arbitrary user.
-# ❖ The design and implementation of the ledger based on the concept of
-# the blockchain (hash linked list).
-# ❖ Upon detecting any transaction, scrooge verifies it by making sure the
-# coin really belongs to the owner and it has not been spent before.
-# ❖ If verified, Scrooge adds the transaction to the blockchain. Double
-# spending can only happen before the transaction is published.
+
+
 # ❖ For digital signature, use any of the technique described throughout the course.
 
 # ❖ Implement Merkel Tree for the blockchain you create. The Merkel Tree
@@ -66,6 +63,7 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 # the blockchain.
 # ❖ Transaction verification using Merkel Tree to make sure that the coins
 # are not spent before by the same user.
+
 
 # Output Format
 
@@ -75,3 +73,6 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 # ❖ Print the blockchain after a new block is appended.
 # ❖ Terminate the code using the key ‘Space’.
 # ❖ Save all the printed data to a text file upon termination
+
+
+if 
