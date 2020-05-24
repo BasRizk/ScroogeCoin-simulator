@@ -25,6 +25,13 @@ import Coin
 import Block
 
 class Scrooge:
+         
+    __instance = None
+    def __new__(cls, val):
+        if Scrooge.__instance is None:
+            Scrooge.__instance = object.__new__(cls)
+        Scrooge.__instance.val = val
+        return Scrooge.__instance
     
     def __init__(self):
         self.ledger = Ledger()

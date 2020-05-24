@@ -13,5 +13,8 @@ class User:
     def pay(self, amount, recipient_vk):
         transaction = Transaction(self, amount, recipient_vk)
 
+    def sign(self. content):
+        return self._sk.sign(content)
+    
     def confirm_transaction(self, transaction):
         pass
