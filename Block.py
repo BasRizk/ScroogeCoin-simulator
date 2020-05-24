@@ -10,7 +10,7 @@ class Block:
         self.id = current_id
         self.prev_hash_pt = prev_hash_pt
         self.transactions = []
-        self.hash = ''
+        self.hash = None
 
         _current_id += 1
     

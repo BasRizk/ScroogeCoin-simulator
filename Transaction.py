@@ -7,9 +7,9 @@ class Transaction:
         self.sender = sender
         self.amount = amount
         self.recipient_vk = recipient_vk
-        self.prev_hash_pt = ''
-        self.hash = ''
-        self.signature = ''
+        self.prev_hash_pt = None
+        self.hash = None
+        self.signature = None
         # TODO
         self.coins = sender.get_coins(amount)
 
