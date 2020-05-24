@@ -1,9 +1,5 @@
 class Ledger:
 
     def __init__(self):
-        self.blockchain = []
-        self.last_hp = None
-        self.last_hp_signed = ''
-
-    def add_block(self, block):
-        self.blockchain.append(block)
+        self.last_hash_pt = None
+        self.last_hash_pt_signed = ''

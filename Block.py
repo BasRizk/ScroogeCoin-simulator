@@ -3,19 +3,20 @@ from base64 import b64encode
 
 class Block:
     
-    id = 0
-    capacity = 10
+    _current_id = 0
+    _capacity = 10
     
-    def __init__(self, _prev_hash_pt):
-        self.id = id
+    def __init__(self, prev_hash_pt):
+        self.id = current_id
         self.prev_hash_pt = prev_hash_pt
         self.transactions = []
         self.hash = ''
 
-        id += 1
+        _current_id += 1
     
     def add_transaction(self, trans):
         self._transactions.append(trans)
-        if len(self.transactions) >= capacity:
+        if len(self.transactions) >= _capacity:
             return True
         return False
+    
