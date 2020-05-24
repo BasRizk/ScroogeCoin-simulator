@@ -6,7 +6,8 @@ class Transaction:
     def __new__(cls, sender, amount, recipient_vk): 
         print("Creating Transaction") 
         # Create transaction only if coins available 
-        if len(sender.get_coins(amount)) == amount:            
+        coins = sender.get_coins(amount)
+        if (coins is not None) & (len(coins) == amount):            
             return super(Transaction, cls).__new__(cls) 
         else:
             return None
@@ -20,7 +21,7 @@ class Transaction:
         self.hash = None
         self.signature = None
         # Already verified
-        self.coins = sender.get_coins(amount)
+        self.coins = sender.get_coins(amount, spend=True)
         _current_id += 1
 
     def __str__(self):

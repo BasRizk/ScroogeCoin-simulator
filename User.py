@@ -12,9 +12,23 @@ class User:
 
     def pay(self, amount, recipient_vk):
         transaction = Transaction(self, amount, recipient_vk)
+        if transaction is not None:
+            # TODO what to do with it now
+            pass
+        # TODO Notify user
 
     def sign(self. content):
         return self._sk.sign(content)
     
     def confirm_transaction(self, transaction):
         pass
+    
+    def get_coins(self, amount, spend=False):
+        if len(coins) < amount:
+            return None
+
+        self.coins.shuffle()
+        to_spend_coins = coins[:amount]
+        if spend:
+            coins = coins[amount:]
+        return to_spend_coins
