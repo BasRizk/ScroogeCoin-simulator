@@ -20,6 +20,7 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 - You are allowed to use predefined hash and digital signature libraries.
   Mention which libraries you used.
 """
+import Scrooge
 
 if __name__ == '__main__':
     blockchain = Scrooge()
@@ -74,5 +75,3 @@ if __name__ == '__main__':
 # ❖ Terminate the code using the key ‘Space’.
 # ❖ Save all the printed data to a text file upon termination
 
-
-if 

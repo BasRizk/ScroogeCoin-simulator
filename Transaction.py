@@ -1,14 +1,19 @@
-from Crypto.PublicKey import RSA
-
 class Transaction:
+
+    id = 0
         
-    def __init__(self, _id, _hash, _prev_hash_pt, _amount, _signature):
-        self._id = _id
-        self._hash = self.generate_hash()
-        self._prev_hash_pt = _prev_hash_pt
-        self._amount = _amount
-        self._signature = _signature
-        
-    def generate_hash(self):
-        pass
-    
+    def __init__(self, sender, amount, recipient_vk):
+        self.id = id
+        self.sender = sender
+        self.amount = amount
+        self.recipient_vk = recipient_vk
+        self.prev_hash_pt = ''
+        self.hash = ''
+        self.signature = ''
+
+        self.coins = sender.get_coins(amount)
+
+        id += 1
+
+    def __str__(self):
+        return str(self.id) + self.prev_hash_pt + str(self.amount) + self.recipient

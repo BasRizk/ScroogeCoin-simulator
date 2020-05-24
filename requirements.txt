@@ -1,2 +1,4 @@
+ecdsa==0.15
 hashutils==0.0.3
 pycryptodomex==3.9.7
+six==1.15.0
