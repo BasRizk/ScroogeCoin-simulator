@@ -25,6 +25,10 @@ class Transaction:
         _current_id += 1
 
     def __str__(self):
-        return str(self.id) + self.prev_hash_pt + str(self.amount) + self.recipient
+        return 'Transaction:\t' + str(self.id) + '\n'\
+                + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
+                + 'Amount:\t' + str(self.amount) + '\n'\
+                + 'From:\t' + str(self.sender.vk) + '\n'\
+                + 'To:\t' + str(self.recipient_vk)
     
     

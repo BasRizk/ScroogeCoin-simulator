@@ -7,7 +7,7 @@ class Block:
     _capacity = 10
     
     def __init__(self, prev_hash_pt):
-        self.id = current_id
+        self.id = _current_id
         self.prev_hash_pt = prev_hash_pt
         self.transactions = []
         self.hash = None
@@ -19,4 +19,9 @@ class Block:
         if len(self.transactions) >= _capacity:
             return True
         return False
-    
+
+    def __str__(self):
+        return 'Block:\t' + str(self.id) + '\n'\
+                + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
+                + 'Transactions:\t' + str(self.transactions) + '\n'\
+                + 'Hash:\t' + str(self.hash) + '\n'
