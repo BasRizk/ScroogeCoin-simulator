@@ -63,6 +63,7 @@ class Scrooge:
     def publish_transaction(self, transaction):
         # Publish transaction to the block
         transaction.prev_hash_pt = self._last_transaction_hash_pt
+        transaction.hash = sha256(str(transaction)+(transaction.signature).encode('utf-8')).hexdigest()
         is_full = self._current_block.add_transaction(transaction)
 
         self._last_transaction_hash_pt = (transaction, transaction.hash)
@@ -99,11 +100,8 @@ class Scrooge:
     
     def create_coin_transaction(self, recipient_vk, amount):
         self.create_coin()
-        
-        transaction = Transaction(self.vk, amount, recipient_vk)
-        transaction.signature = self._sk.sign(str(transaction))
-        transaction.hash = sha256(str(transaction)+(transaction.signature).encode('utf-8')).hexdigest()
-
+        transaction = Transaction(vk, amount, recipient_vk)
+        transaction.signature = self.sk.sign(str(transaction))
         self.publish_transaction(transaction)
 
 
