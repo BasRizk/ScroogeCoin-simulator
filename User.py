@@ -30,5 +30,5 @@ class User:
         self.coins.shuffle()
         to_spend_coins = self.coins[:amount]
         if spend:
-            coins = coins[amount:]
+            self.coins = self.coins[amount:]
         return to_spend_coins

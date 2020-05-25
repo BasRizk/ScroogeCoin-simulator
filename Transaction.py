@@ -13,7 +13,7 @@ class Transaction:
             return None
      
     def __init__(self, sender, amount, recipient_vk):
-        self.id = _current_id
+        self.id = self._current_id
         self.sender = sender
         self.amount = amount
         self.recipient_vk = recipient_vk
@@ -22,7 +22,7 @@ class Transaction:
         self.signature = None
         # Already verified
         self.coins = sender.get_coins(amount, spend=True)
-        _current_id += 1
+        self._current_id += 1
 
     def __str__(self):
         return 'Transaction:\t' + str(self.id) + '\n'\
