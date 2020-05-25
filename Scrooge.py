@@ -63,7 +63,7 @@ class Scrooge:
     def publish_transaction(self, transaction):
         # Publish transaction to the block
         transaction.prev_hash_pt = self._last_transaction_hash_pt
-        transaction.hash = sha256(str(transaction)+(transaction.signature).encode('utf-8')).hexdigest()
+        transaction.hash = sha256((str(transaction)+(transaction.signature)).encode('utf-8')).hexdigest()
         is_full = self._current_block.add_transaction(transaction)
 
         self._last_transaction_hash_pt = (transaction, transaction.hash)
@@ -113,6 +113,6 @@ class Scrooge:
         self._current_id += 1
         self._coins.append(c)
         # Add coin to block chain, as owned by Scrooge user
-        self.ledger._user_coins[vk].append(coin)
+        self.ledger._user_coins[vk].append(c)
         
         
