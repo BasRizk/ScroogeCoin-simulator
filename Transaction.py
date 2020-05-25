@@ -30,12 +30,14 @@ class Transaction:
             return 'Transaction:\t' + str(self.id) + '\n'\
                     + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
                     + 'Amount:\t' + str(self.amount) + '\n'\
+                    + 'Coins:\t' + str([str(coin.id) for coin in self.coins][1:-1]) + '\n'\
                     + 'From:\t' + str(self.sender_vk) + '\n'\
                     + 'To:\t' + str(self.recipient_vk)
         else:
             return 'Transaction:\t' + str(self.id) + '\n'\
                     + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
                     + 'Amount:\t' + str(self.amount) + '\n'\
+                    + 'Coins:\t' + str([str(coin.id) for coin in self.coins][1:-1]) + '\n'\
                     + 'From:\t' + str(self.sender_vk) + '\n'\
                     + 'To:\t' + str(self.recipient_vk) + '\n'\
                     + 'Signature:\t' + str(self.signature)
