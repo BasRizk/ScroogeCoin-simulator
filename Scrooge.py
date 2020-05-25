@@ -83,9 +83,13 @@ class Scrooge:
             while True:
                 if c_loop in t_loop.coins:
                     if transaction.sender.vk != t_loop.recipient_vk:
+                        print("Double spending attack detected. Ignore Transaction.")
                         return False
                     break
                 t_loop = t_loop.prev_hash_pt[0]
+                if t_loop is None:
+                    print("Double spending attack detected. Ignore Transaction.")
+                    return False
         return True
     
 # TO-REVISE IS LAST_HASH_PT PUBLIC OR NOT
