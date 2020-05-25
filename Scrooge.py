@@ -63,7 +63,7 @@ class Scrooge:
     def publish_transaction(self, transaction):
         # Publish transaction to the block
         transaction.prev_hash_pt = self._last_transaction_hash_pt
-        transaction.hash = sha256(str(transaction)+(transaction.signature).encode('utf-8')).hexdigest()
+        transaction.hash = sha256((str(transaction)+(transaction.signature)).encode('utf-8')).hexdigest()
         is_full = self._current_block.add_transaction(transaction)
 
         self._last_transaction_hash_pt = (transaction, transaction.hash)
@@ -83,9 +83,13 @@ class Scrooge:
             while True:
                 if c_loop in t_loop.coins:
                     if transaction.sender.vk != t_loop.recipient_vk:
+                        print("Double spending attack detected. Ignore Transaction.")
                         return False
                     break
                 t_loop = t_loop.prev_hash_pt[0]
+                if t_loop is None:
+                    print("Double spending attack detected. Ignore Transaction.")
+                    return False
         return True
     
 # TO-REVISE IS LAST_HASH_PT PUBLIC OR NOT
@@ -99,7 +103,8 @@ class Scrooge:
         return False
     
     def create_coin_transaction(self, recipient_vk, amount):
-        self.create_coin()
+        for i in range(amount):
+            self.create_coin()
         transaction = Transaction(vk, amount, recipient_vk)
         transaction.signature = self.sk.sign(str(transaction))
         self.publish_transaction(transaction)
@@ -113,6 +118,6 @@ class Scrooge:
         self._current_id += 1
         self._coins.append(c)
         # Add coin to block chain, as owned by Scrooge user
-        self.ledger._user_coins[vk].append(coin)
+        self.ledger._user_coins[vk].append(c)
         
         
