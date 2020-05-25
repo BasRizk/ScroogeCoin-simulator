@@ -33,8 +33,8 @@ class Scrooge:
         Scrooge.__instance.val = val
         return Scrooge.__instance
     
-    def __init__(self):
-        self.ledger = Ledger()
+    def __init__(self, users_vk):
+        self.ledger = Ledger(users_vk)
         self._current_block = Block(None)
         self._current_id = 0
         self._coins = []
@@ -43,6 +43,11 @@ class Scrooge:
         # Keys
         self._sk = SigningKey.generate()
         self.vk = self._sk.verifying_key
+
+        # Create the initial coins
+        for vk in users_vk:
+            for coint in range(10):
+                self.create_coin_transaction(vk, 10)
 
     def run(self):
         pass
