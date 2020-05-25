@@ -21,9 +21,17 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
   Mention which libraries you used.
 """
 import Scrooge
+import User
 
 if __name__ == '__main__':
-    blockchain = Scrooge()
+    users = []
+    for i in range(10):
+        user = User()
+        users.append(user)
+    vks = [user.vk for user in users]
+    blockchain = Scrooge(vks)
+    for i in users:
+        print(user.vk + ':\t' + str(len(user.coins)))
     blockchain.run()
     
 # General Notes

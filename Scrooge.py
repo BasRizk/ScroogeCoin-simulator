@@ -46,8 +46,7 @@ class Scrooge:
 
         # Create the initial coins
         for vk in users_vk:
-            for coint in range(10):
-                self.create_coin_transaction(vk, 10)
+            self.create_coin_transaction(vk, 10)
 
     def run(self):
         pass
@@ -61,6 +60,8 @@ class Scrooge:
         self.ledger.last_hash_pt = self._current_block.prev_hash_pt
         self.ledger.last_hash_pt_signed = self.sk.sign(self.ledger.last_hash_pt)
 
+        print(str(self.ledger))
+
     def publish_transaction(self, transaction):
         # Publish transaction to the block
         transaction.prev_hash_pt = self._last_transaction_hash_pt
@@ -70,6 +71,7 @@ class Scrooge:
         if is_full:
             self.publish_block()
     
+        print(self._current_block)
 
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
