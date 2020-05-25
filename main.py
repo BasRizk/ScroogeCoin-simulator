@@ -21,9 +21,15 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
   Mention which libraries you used.
 """
 import Scrooge, User, Ledger
+import keyboard
 
 
 def run_simulation():
+    # while(True)
+    # if keyboard.is_pressed(' '):
+    # print('Space is pressed')
+    # break
+
     users = []
     for i in range(10):
         user = User()
