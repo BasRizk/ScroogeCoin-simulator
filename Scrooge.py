@@ -103,7 +103,8 @@ class Scrooge:
         return False
     
     def create_coin_transaction(self, recipient_vk, amount):
-        self.create_coin()
+        for i in range(amount):
+            self.create_coin()
         transaction = Transaction(vk, amount, recipient_vk)
         transaction.signature = self.sk.sign(str(transaction))
         self.publish_transaction(transaction)
