@@ -26,10 +26,16 @@ class Transaction:
         self._current_id += 1
 
     def __str__(self):
-        return 'Transaction:\t' + str(self.id) + '\n'\
-                + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
-                + 'Amount:\t' + str(self.amount) + '\n'\
-                + 'From:\t' + str(self.sender_vk) + '\n'\
-                + 'To:\t' + str(self.recipient_vk)
-    
-    
+        if self.signature is None or len(self.signature) <= 0:
+            return 'Transaction:\t' + str(self.id) + '\n'\
+                    + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
+                    + 'Amount:\t' + str(self.amount) + '\n'\
+                    + 'From:\t' + str(self.sender_vk) + '\n'\
+                    + 'To:\t' + str(self.recipient_vk)
+        else:
+            return 'Transaction:\t' + str(self.id) + '\n'\
+                    + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
+                    + 'Amount:\t' + str(self.amount) + '\n'\
+                    + 'From:\t' + str(self.sender_vk) + '\n'\
+                    + 'To:\t' + str(self.recipient_vk) + '\n'\
+                    + 'Signature:\t' + str(self.signature)
