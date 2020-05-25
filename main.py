@@ -47,10 +47,6 @@ if __name__ == '__main__':
 # General Notes
 
 #------ TODO
-# 4- The final hash pointer should be signed by Scrooge.
-# 5- Scrooge verifies that the transaction belongs to the owner.
-# 6- Scrooge verifies that the transaction is not a Double spending.
-# 7- If 5 and 6 are verified Scrooge publishes the transaction to the block.
 # 8- Scrooge will create and sign the 10 initial scrooge coins for each user.
 # 9- A user cannot confirm a transaction unless it is published on the blockchain.
 # 10- Additional transaction verification should be applied using the Merkel Tree.
@@ -61,6 +57,10 @@ if __name__ == '__main__':
 # previous. transaction, the amount of coins and signed by the sender.
 # 3- Each block in the blockchain should have a block ID, 10 valid
 # transactions, a hash of the block, and a hash pointer to the previous block.
+# 4- The final hash pointer should be signed by Scrooge.
+# 5- Scrooge verifies that the transaction belongs to the owner.
+# 6- Scrooge verifies that the transaction is not a Double spending.
+# 7- If 5 and 6 are verified Scrooge publishes the transaction to the block.
 
 
 
