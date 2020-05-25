@@ -1,6 +1,3 @@
-from hashlib import sha256
-from base64 import b64encode
-
 class Block:
     
     _current_id = 0

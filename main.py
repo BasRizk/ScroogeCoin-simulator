@@ -20,10 +20,10 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 - You are allowed to use predefined hash and digital signature libraries.
   Mention which libraries you used.
 """
-import Scrooge
-import User
+import Scrooge, User, Ledger
 
-if __name__ == '__main__':
+
+def run_simulation():
     users = []
     for i in range(10):
         user = User()
@@ -33,6 +33,16 @@ if __name__ == '__main__':
     for i in users:
         print(user.vk + ':\t' + str(len(user.coins)))
     blockchain.run()
+    
+    # TODO - MOVED FROM SCROOGE - Create the initial coins
+    for vk in users_vk:
+        self.create_coin_transaction(vk, 10)
+
+    
+
+if __name__ == '__main__':
+    run_simulation()
+    
     
 # General Notes
 

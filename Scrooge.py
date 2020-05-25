@@ -27,46 +27,44 @@ import Block
 class Scrooge:
          
     __instance = None
-    def __new__(cls, val):
+    def __new__(cls):
         if Scrooge.__instance is None:
             Scrooge.__instance = object.__new__(cls)
-        Scrooge.__instance.val = val
+            Scrooge.__instance._sealed = False
         return Scrooge.__instance
     
-    def __init__(self, users_vk):
-        self.ledger = Ledger(users_vk)
+    def __init__(self):
+        if self._sealed:
+            return
+        self._sealed = True
+
+        # Keys
+        self._sk = SigningKey.generate()
+        self.vk = self._sk.verifying_key
+        
+        self.ledger = Ledger(self.vk)
         self._current_block = Block(None)
         self._current_id = 0
         self._coins = []
         self._last_transaction_hash_pt = None
         
-        # Keys
-        self._sk = SigningKey.generate()
-        self.vk = self._sk.verifying_key
-
-        # Create the initial coins
-        for vk in users_vk:
-            self.create_coin_transaction(vk, 10)
-
-    def run(self):
-        pass
-
     def publish_block(self):
-        self._current_block.hash = sha256(self._current_block.encode('utf-8')).hexdigest()        
+        self._current_block.hash = sha256(self._current_block.encode('utf-8')).hexdigest() 
+        
+        # TO-REVISE Upon that command block transactions are executed
         self.ledger.add_block(self._current_block)
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 
         self.ledger.last_hash_pt = self._current_block.prev_hash_pt
         self.ledger.last_hash_pt_signed = self.sk.sign(self.ledger.last_hash_pt)
-
         print(str(self.ledger))
 
     def publish_transaction(self, transaction):
         # Publish transaction to the block
         transaction.prev_hash_pt = self._last_transaction_hash_pt
         is_full = self._current_block.add_transaction(transaction)
-        # TO-REVISE
+
         self._last_transaction_hash_pt = (transaction, transaction.hash)
         if is_full:
             self.publish_block()
@@ -100,10 +98,10 @@ class Scrooge:
         return False
     
     def create_coin_transaction(self, recipient_vk, amount):
-        coin = self.create_coin()
+        self.create_coin()
         
-        transaction = Transaction(vk, amount, recipient_vk)
-        transaction.signature = self.sk.sign(str(transaction))
+        transaction = Transaction(self.vk, amount, recipient_vk)
+        transaction.signature = self._sk.sign(str(transaction))
         transaction.hash = sha256(str(transaction)+(transaction.signature).encode('utf-8')).hexdigest()
 
         self.publish_transaction(transaction)
@@ -111,10 +109,12 @@ class Scrooge:
 
     def create_coin(self):
         # Generate unique coin id
-        # Sign by scrooge
         c = Coin(self._current_id)
+        # Sign by scrooge
         c.sign(self.sk.sign(str(c)))
         self._current_id += 1
-        self._coins.append(c) 
+        self._coins.append(c)
+        # Add coin to block chain, as owned by Scrooge user
+        self.ledger._user_coins[vk].append(coin)
         
         
