@@ -20,34 +20,68 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 - You are allowed to use predefined hash and digital signature libraries.
   Mention which libraries you used.
 """
-import Scrooge, User, Ledger
+from Scrooge import Scrooge
+from User import User
+from Ledger import Ledger
+
 import keyboard
+import random 
 
 
-def run_simulation():
-    # while(True)
-    # if keyboard.is_pressed(' '):
-    # print('Space is pressed')
-    # break
-
+def run_simulation(DEBUG_MODE):
+    blockchain = Scrooge()
     users = []
     for i in range(10):
         user = User()
         users.append(user)
+    
     vks = [user.vk for user in users]
-    blockchain = Scrooge(vks)
-    for i in users:
-        print(user.vk + ':\t' + str(len(user.coins)))
-    blockchain.run()
-    
-    # TODO - MOVED FROM SCROOGE - Create the initial coins
-    for vk in users_vk:
-        self.create_coin_transaction(vk, 10)
 
-    
+    # TODO - MOVED FROM SCROOGE - Create the initial coins
+    print('Start - 0 coins per users\n----------------------------------\n')
+    for user in users:
+        print(user.vk + ':\t' + str(len(blockchain.ledger._users_coins[user.vk])))
+        print('----------------------------------')
+    print('\n----------------------------------\n')
+    print('The initial 10 coin transactions\n----------------------------------\n')
+    for vk in vks:
+        blockchain.create_coin_transaction(vk, 10)
+    print('\n----------------------------------\n')
+    print('Inital amount of coins per user\n----------------------------------\n')
+    for user in users:
+        print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+    print('\n----------------------------------\n')
+    print('START SIMULATION')
+    print('\n----------------------------------\n')
+
+    while(True):
+        finish = False
+        while DEBUG_MODE:
+            if keyboard.is_pressed('\n'):
+                break
+            if keyboard.is_pressed(' '):
+                print('Space is pressed')
+                return
+        else:
+            if keyboard.is_pressed(' '):
+                print('Space is pressed')
+                return
+        sender = random.choice(users)
+        sender_vk = sender.vk
+        while True:
+            recipient = random.choice(vks) 
+            if sender_vk != recipient:
+                break
+        if len(blockchain.ledger._users_coins[sender_vk]) >= 1:
+            amount = random.randint(1, len(blockchain.ledger._users_coins[sender_vk]))
+            transaction = sender.pay(amount, recipient)
+            if transaction:
+                blockchain.handle_payment_transaction(transaction)
+
+
 
 if __name__ == '__main__':
-    run_simulation()
+    run_simulation(DEBUG_MODE=True)
     
     
 # General Notes

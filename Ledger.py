@@ -21,22 +21,24 @@ class Ledger:
         
 
     def __str__(self):
-        block = self.last_hash_pt[0]
+        block = self.last_hash_pt[0] if self.last_hash_pt else None
         blockchain = ''
         while True:
-            blockchain += (str(block) + '\n')
-            block = block.prev_hash_pt[0]
+            if block is None:
+                break
+            blockchain += (block.get_print() + '\n---------------------------------\n')
+            block = block.prev_hash_pt[0] if block.prev_hash_pt else None
         return blockchain
     
     def add_block(self, block):
         # Apply Block Transactions (Exchange Coins)
         for t in block.transactions:
             consumed_coins = t.coins
-            sender_coins = self._user_coins[t.sender_vk]
+            sender_coins = self._users_coins[t.sender_vk]
             left_over_coins =\
                 [c for c in sender_coins if c not in consumed_coins]
             self._users_coins[t.sender_vk] = left_over_coins
-            self._users_coins[t.recipient_vk].append(consumed_coins)
+            self._users_coins[t.recipient_vk] = self._users_coins[t.recipient_vk] + consumed_coins
         
     @staticmethod       
     def get_coins(user_vk, amount):
@@ -45,7 +47,7 @@ class Ledger:
         available_coins = Ledger.__instance._users_coins[user_vk]
         if len(available_coins) < amount:
             return None
-        to_spend_coins = Ledger.__instance.coins[:amount]
+        to_spend_coins = available_coins[:amount]
         return to_spend_coins
     
     @staticmethod
