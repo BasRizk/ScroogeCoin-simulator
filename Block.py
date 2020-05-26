@@ -17,10 +17,20 @@ class Block:
             return True
         return False
 
+    def get_print_mini(self):
+            transactions = ''
+            for transaction in self.transactions:
+                transactions += str(transaction.id) + ','
+            return 'Block:\t' + str(self.id) + '\n'\
+                    + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                    + 'Transactions:\t{ ' + transactions[:-1] + ' }\n'\
+                    + 'Hash:\t' + str(self.hash) + '\n'
     def get_print(self):
         transactions = ''
-        for transaction in self.transactions:
-            transactions += transaction.get_print() + '--------\n'
+        for transaction in self.transactions[:-1]:
+            transactions += transaction.get_print_mini() + '--------\n'
+        if len(self.transactions):
+            transactions += self.transactions[-1].get_print()
         return 'Block:\t' + str(self.id) + '\n'\
                 + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
                 + 'Transactions: {\n' + transactions + '}\n'\

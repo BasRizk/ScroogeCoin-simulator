@@ -23,14 +23,26 @@ class Transaction:
         self.coins = Ledger.get_coins(sender_vk, amount) if coins is None else coins
         Transaction._current_id += 1
 
-    def get_print(self):
+    def get_print_mini(self):
         coins = ''
         for coin in self.coins:
-            coins += str(coin._id) + ': ' + str(coin._signature) + '\n--------\n'
+            coins += str(coin._id) + ','
         return '\tTransaction:\t' + str(self.id) + '\n'\
                     + '\tPrevious:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
                     + '\tAmount:\t' + str(self.amount) + '\n'\
-                    + '\tCoins:{\n' + coins + '}\n'\
+                    + '\tCoins:\t{ ' + coins[:-1] + ' }\n'\
+                    + '\tFrom:\t' + str(self.sender_vk) + '\n'\
+                    + '\tTo:\t' + str(self.recipient_vk) + '\n'\
+                    + '\tSignature:\t' + str(self.signature) + '\n'\
+                    + '\tHash:\t' + str(self.hash) + '\n'
+    def get_print(self):
+        coins = ''
+        for coin in self.coins:
+            coins += '\t' + str(coin._id) + ': ' + str(coin._signature) + '\n\t--------\n'
+        return '\tTransaction:\t' + str(self.id) + '\n'\
+                    + '\tPrevious:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                    + '\tAmount:\t' + str(self.amount) + '\n'\
+                    + '\tCoins:{\n' + coins + '\t}\n'\
                     + '\tFrom:\t' + str(self.sender_vk) + '\n'\
                     + '\tTo:\t' + str(self.recipient_vk) + '\n'\
                     + '\tSignature:\t' + str(self.signature) + '\n'\

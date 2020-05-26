@@ -29,7 +29,7 @@ class Ledger:
         while True:
             if block is None:
                 break
-            blockchain += (block.get_print() + '\n---------------------------------\n')
+            blockchain += (block.get_print_mini() + '\n---------------------------------\n')
             block = block.prev_hash_pt[0] if block.prev_hash_pt else None
         blockchain += "\n--------------------------------\n\tWallets\n--------------------------------\n\n"
         for vk in self._users_coins:

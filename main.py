@@ -33,7 +33,7 @@ def init_logger():
         level=logging.INFO,
         format="[%(levelname)-5.5s] %(message)s",
         handlers=[
-            logging.FileHandler("debug.log"),
+            logging.FileHandler("debug.log", mode='w'),
             logging.StreamHandler()
         ]
     )
@@ -45,7 +45,7 @@ def run_simulation(DEBUG_MODE):
     
     blockchain = Scrooge()
     users = []
-    for i in range(100):
+    for i in range(10):
         user = User()
         users.append(user)
     
@@ -68,7 +68,7 @@ def run_simulation(DEBUG_MODE):
     logging.info('Inital amount of coins per user')
     logging.info('----------------------------------')
     for user in users:
-        print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+        logging.info(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
     logging.info('----------------------------------')
     
     logging.info('START SIMULATION')
