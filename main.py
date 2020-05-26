@@ -55,7 +55,8 @@ def run_simulation(DEBUG_MODE):
     print('\n----------------------------------\n')
 
     while(True):
-        finish = False
+        if DEBUG_MODE:
+            print("DEBUG MODE: Press Enter for next step")
         while DEBUG_MODE:
             if keyboard.is_pressed('\n'):
                 break
