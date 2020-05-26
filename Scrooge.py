@@ -24,6 +24,8 @@ from Transaction import Transaction
 from Coin import Coin
 from Block import Block
 
+import logging
+
 class Scrooge:
          
     __instance = None
@@ -36,8 +38,8 @@ class Scrooge:
     def __init__(self):
         if self._sealed:
             return
+        
         self._sealed = True
-
         # Keys
         self._sk = SigningKey.generate(curve=NIST384p, hashfunc=sha256)
         self.vk = self._sk.verifying_key.to_string().hex()
@@ -51,14 +53,14 @@ class Scrooge:
     def publish_block(self):
         self._current_block.hash = sha256(str(self._current_block).encode('utf-8')).hexdigest() 
         
-        # TO-REVISE Upon that command block transactions are executed
+        # Upon that command block transactions are executed
         self.ledger.add_block(self._current_block)
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 
         self.ledger.last_hash_pt = self._current_block.prev_hash_pt
         self.ledger.last_hash_pt_signed = self._sk.sign((str(self.ledger.last_hash_pt[0]) + str(self.ledger.last_hash_pt[1])).encode('utf-8'))
-        print(str(self.ledger))
+        logging.info(str(self.ledger))
 
     def publish_transaction(self, transaction):
         # Publish transaction to the block
@@ -70,14 +72,14 @@ class Scrooge:
         if is_full:
             self.publish_block()
         
-        print(self._current_block.get_print())
+        logging.info(self._current_block.get_print())
 
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
         try:
             return VerifyingKey.from_string(bytes.fromhex(transaction.sender_vk), curve=NIST384p).verify(bytes.fromhex(transaction.signature), str(transaction).encode('utf-8'), sha256)
         except BadSignatureError:
-            print("Verification failed")
+            logging.info("Verification failed")
         return False
     def verify_no_double_spending(self, transaction):
         # Verify that the transaction is not a Double spending
@@ -86,14 +88,14 @@ class Scrooge:
             while True:
                 if c_loop in t_loop.coins:
                     if transaction.sender_vk != t_loop.recipient_vk:
-                        print("Double spending attack detected. Ignore Transaction.")
-                        print(transaction.get_print())
+                        logging.info("Double spending attack detected. Ignore Transaction.")
+                        logging.info(transaction.get_print())
                         return False
                     break
                 t_loop = t_loop.prev_hash_pt[0]
                 if t_loop is None:
-                    print("Double spending attack detected. Ignore Transaction.")
-                    print(transaction.get_print())
+                    logging.info("Double spending attack detected. Ignore Transaction.")
+                    logging.info(transaction.get_print())
                     return False
         return True
     

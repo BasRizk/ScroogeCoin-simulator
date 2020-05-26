@@ -1,4 +1,5 @@
 import random 
+import logging
 
 class Ledger:
     
@@ -24,7 +25,7 @@ class Ledger:
 
     def __str__(self):
         block = self.last_hash_pt[0] if self.last_hash_pt else None
-        blockchain = ''
+        blockchain = '\n'
         while True:
             if block is None:
                 break
@@ -32,8 +33,8 @@ class Ledger:
             block = block.prev_hash_pt[0] if block.prev_hash_pt else None
         blockchain += "\n--------------------------------\n\tWallets\n--------------------------------\n\n"
         for vk in self._users_coins:
-            print(vk + ':\n' + str(len(self._users_coins[vk])))
-            print('--------------------------------\n\n')
+            logging.info(vk + ':\n' + str(len(self._users_coins[vk])))
+            logging.info('--------------------------------')
         return blockchain
     
     def add_block(self, block):
@@ -47,7 +48,7 @@ class Ledger:
             random.shuffle(self._users_coins[t.sender_vk])
             self._users_coins[t.recipient_vk] = self._users_coins[t.recipient_vk] + consumed_coins
             random.shuffle(self._users_coins[t.recipient_vk])
-            print("published")
+        logging.info("A Block is published")
         
     @staticmethod       
     def get_coins(user_vk, amount):

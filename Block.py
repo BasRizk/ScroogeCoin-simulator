@@ -20,7 +20,7 @@ class Block:
     def get_print(self):
         transactions = ''
         for transaction in self.transactions:
-            transactions += '\t' + transaction.get_print() + '--------\n'
+            transactions += transaction.get_print() + '--------\n'
         return 'Block:\t' + str(self.id) + '\n'\
                 + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
                 + 'Transactions: {\n' + transactions + '}\n'\

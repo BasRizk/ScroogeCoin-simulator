@@ -28,7 +28,6 @@ import random
 import logging
 
 def init_logger():
-    # handlers = [logging.FileHandler('out.log'), logging.StreamHandler(sys.stdout)]
     # logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")    
     logging.basicConfig(
         level=logging.INFO,
@@ -42,6 +41,8 @@ def init_logger():
     logging.getLogger().setLevel(logging.DEBUG)
     
 def run_simulation(DEBUG_MODE):
+    init_logger() 
+    
     blockchain = Scrooge()
     users = []
     for i in range(100):
@@ -49,26 +50,29 @@ def run_simulation(DEBUG_MODE):
         users.append(user)
     
     vks = [user.vk for user in users]
-
-
-    init_logger() 
         
-    # TODO - MOVED FROM SCROOGE - Create the initial coins
-    logging.info('Start - Empty Wallets\n----------------------------------\n')
+    logging.info('Start - Empty Wallets')
+    logging.info('----------------------------------')
     for user in users:
         logging.info(user.vk + ':\t' + str(len(blockchain.ledger._users_coins[user.vk])))
         logging.info('----------------------------------')
-    logging.info('\n----------------------------------\n')
-    logging.info('The initial 10 coin transactions\n----------------------------------\n')
+    logging.info('----------------------------------')
+    
+    logging.info('The initial 10 coin transactions')
+    logging.info('----------------------------------')
+    # Initially each user will have 10 ScroogCoins
     for vk in vks:
         blockchain.create_coin_transaction(vk, 10)
-    logging.info('\n----------------------------------\n')
-    logging.info('Inital amount of coins per user\n----------------------------------\n')
+    logging.info('----------------------------------')
+    
+    logging.info('Inital amount of coins per user')
+    logging.info('----------------------------------')
     for user in users:
         print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
-    logging.info('\n----------------------------------\n')
+    logging.info('----------------------------------')
+    
     logging.info('START SIMULATION')
-    logging.info('\n----------------------------------\n')
+    logging.info('----------------------------------')
 
     while(True):
         debug_attack = False

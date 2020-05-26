@@ -1,8 +1,10 @@
 from hashlib import sha256
-from ecdsa import SigningKey, VerifyingKey, NIST384p
+from ecdsa import SigningKey, NIST384p
 
 from Transaction import Transaction
 from Ledger import Ledger
+
+import logging
 
 class User:
     
@@ -18,5 +20,5 @@ class User:
             transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
             transaction.hash = sha256((str(transaction) + str(transaction.signature)).encode('utf-8')).hexdigest()
             return transaction
-        print("Not enough coins available")
+        logging.error("Not enough coins available")
         return None
