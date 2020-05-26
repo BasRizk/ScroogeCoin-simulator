@@ -69,10 +69,12 @@ class Scrooge:
         is_full = self._current_block.add_transaction(transaction)
 
         self._last_transaction_hash_pt = (transaction, transaction.hash)
+        
+        logging.info(self._current_block.get_print())
+
         if is_full:
             self.publish_block()
         
-        logging.info(self._current_block.get_print())
 
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
