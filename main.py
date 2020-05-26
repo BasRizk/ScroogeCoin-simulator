@@ -22,6 +22,7 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 """
 from Scrooge import Scrooge
 from User import User
+from Ledger import Ledger
 
 import keyboard
 import random 
@@ -53,8 +54,9 @@ def run_simulation(DEBUG_MODE):
         
     logging.info('Start - Empty Wallets')
     logging.info('----------------------------------')
+    users_coins_dict = Ledger.view_users()
     for user in users:
-        logging.info(user.vk + ':\t' + str(len(blockchain.ledger._users_coins[user.vk])))
+        logging.info(user.vk + ':\t' + str(len(users_coins_dict[user.vk])))
         logging.info('----------------------------------')
     logging.info('----------------------------------')
     
@@ -67,8 +69,9 @@ def run_simulation(DEBUG_MODE):
     
     logging.info('Inital amount of coins per user')
     logging.info('----------------------------------')
+    users_coins_dict = Ledger.view_users()
     for user in users:
-        logging.info(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+        logging.info(user.vk + ':\n' + str(len(users_coins_dict[user.vk])))
     logging.info('----------------------------------')
     
     logging.info('START SIMULATION')
@@ -106,8 +109,8 @@ def run_simulation(DEBUG_MODE):
             if sender_vk != recipient:
                 break
             
-        if len(blockchain.ledger._users_coins[sender_vk]) >= 1:
-            wallet = blockchain.ledger._users_coins[sender_vk]
+        if len(Ledger.view_users()[sender_vk]) >= 1:
+            wallet = Ledger.view_users()[sender_vk]
             amount = random.randint(1, len(wallet))
             double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
             transaction = sender.pay(amount, recipient)
@@ -122,14 +125,14 @@ def run_simulation(DEBUG_MODE):
                 handle = blockchain.handle_payment_transaction(transaction)
                 if not handle and DEBUG_MODE:
                     for user in users:
-                        logging.debug(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+                        logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
                 elif double_spending_attack_chance:
                     recipient = random.choice(vks)
                     transaction_double = sender.pay(amount, recipient, transaction.coins)
                     handle = blockchain.handle_payment_transaction(transaction_double)
                     if not handle and DEBUG_MODE:
                         for user in users:
-                            logging.debug(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+                            logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
             debug_attack = False
             verification_attack = False
             

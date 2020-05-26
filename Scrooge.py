@@ -44,7 +44,7 @@ class Scrooge:
         self._sk = SigningKey.generate(curve=NIST384p, hashfunc=sha256)
         self.vk = self._sk.verifying_key.to_string().hex()
         
-        self.ledger = Ledger(self.vk)
+        self._ledger = Ledger(self.vk)
         self._current_block = Block(None)
         self._current_id = 0
         self._coins = []
@@ -54,13 +54,13 @@ class Scrooge:
         self._current_block.hash = sha256(str(self._current_block).encode('utf-8')).hexdigest() 
         
         # Upon that command block transactions are executed
-        self.ledger.add_block(self._current_block)
+        self._ledger.add_block(self._current_block)
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 
-        self.ledger.last_hash_pt = self._current_block.prev_hash_pt
-        self.ledger.last_hash_pt_signed = self._sk.sign((str(self.ledger.last_hash_pt[0]) + str(self.ledger.last_hash_pt[1])).encode('utf-8'))
-        logging.info(str(self.ledger))
+        self._ledger.last_hash_pt = self._current_block.prev_hash_pt
+        self._ledger.last_hash_pt_signed = self._sk.sign((str(self._ledger.last_hash_pt[0]) + str(self._ledger.last_hash_pt[1])).encode('utf-8'))
+        logging.info(str(self._ledger))
 
     def publish_transaction(self, transaction):
         # Publish transaction to the block
@@ -100,10 +100,6 @@ class Scrooge:
                     logging.info(transaction.get_print())
                     return False
         return True
-    
-# TO-REVISE IS LAST_HASH_PT PUBLIC OR NOT
-# IF SOME ONE ADDED SOMETHING TO LEDGER
-# 
 
     def handle_payment_transaction(self, transaction):
         if self.verify_owner(transaction) and self.verify_no_double_spending(transaction):
@@ -128,6 +124,6 @@ class Scrooge:
         self._current_id += 1
         self._coins.append(c)
         # Add coin to block chain, as owned by Scrooge user
-        self.ledger._users_coins[self.vk].append(c)
+        self._ledger._users_coins[self.vk].append(c)
         
         

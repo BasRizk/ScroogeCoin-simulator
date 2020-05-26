@@ -9,7 +9,6 @@ import logging
 class User:
     
     def __init__(self):
-        self.coins = []
         self._sk = SigningKey.generate(curve=NIST384p, hashfunc=sha256)
         self.vk = self._sk.verifying_key.to_string().hex()
         Ledger.add_user(self.vk)
@@ -22,3 +21,6 @@ class User:
             return transaction
         logging.error("Not enough coins available")
         return None
+    
+    def get_balance(self):
+        return Ledger.get_coins(self.vk)

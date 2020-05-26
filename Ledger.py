@@ -16,25 +16,25 @@ class Ledger:
             return
         self._sealed = True
 
-        self.last_hash_pt = None
-        self.last_hash_pt_signed = None
+        self._last_hash_pt = None
+        self._last_hash_pt_signed = None
         
         self._users_coins = {}
         self._users_coins[scrooge_vk] = []
         
 
     def __str__(self):
-        block = self.last_hash_pt[0] if self.last_hash_pt else None
+        block = self._last_hash_pt[0] if self._last_hash_pt else None
         blockchain = '\n'
         while True:
             if block is None:
                 break
             blockchain += (block.get_print_mini() + '\n---------------------------------\n')
             block = block.prev_hash_pt[0] if block.prev_hash_pt else None
-        blockchain += "\n--------------------------------\n\tWallets\n--------------------------------\n\n"
-        for vk in self._users_coins:
-            logging.info(vk + ':\n' + str(len(self._users_coins[vk])))
-            logging.info('--------------------------------')
+        blockchain += "\n--------------------------------\n\tWallets\n--------------------------------\n"
+        for vk, coins in self._users_coins.items():
+            blockchain += vk + ':\n' + str(len(coins))
+            blockchain += '\n--------------------------------\n'
         return blockchain
     
     def add_block(self, block):
@@ -51,11 +51,11 @@ class Ledger:
         logging.info("A Block is published")
         
     @staticmethod       
-    def get_coins(user_vk, amount):
+    def get_coins(user_vk, amount=-1):
         if Ledger.__instance is None:
             return None
         available_coins = Ledger.__instance._users_coins[user_vk]
-        if len(available_coins) < amount:
+        if len(available_coins) < amount & amount != -1:
             return None
         to_spend_coins = available_coins[:amount]
         return to_spend_coins
@@ -69,7 +69,12 @@ class Ledger:
     @staticmethod
     def view_users():
         if Ledger.__instance is None:
+            logging.error("No Ledger is created")
             return None
         return Ledger.__instance._users_coins.copy()
+    
+    @staticmethod
+    def get_last_hash_pts():
+        return (Ledger._last_hash_pt_signed, Ledger._last_hash_pt)
     
         
