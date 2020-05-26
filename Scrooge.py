@@ -17,7 +17,7 @@ spending can only happen before the transaction is published.
 """
 from hashlib import sha256
 from base64 import b64encode
-from ecdsa import SigningKey, VerifyingKey, NIST384p
+from ecdsa import SigningKey, VerifyingKey, NIST384p, BadSignatureError
 
 from Ledger import Ledger
 from Transaction import Transaction
@@ -74,8 +74,11 @@ class Scrooge:
 
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
-        return VerifyingKey.from_string(bytes.fromhex(transaction.sender_vk), curve=NIST384p).verify(bytes.fromhex(transaction.signature), str(transaction).encode('utf-8'), sha256)
-
+        try:
+            return VerifyingKey.from_string(bytes.fromhex(transaction.sender_vk), curve=NIST384p).verify(bytes.fromhex(transaction.signature), str(transaction).encode('utf-8'), sha256)
+        except BadSignatureError:
+            print("Verification failed")
+        return False
     def verify_no_double_spending(self, transaction):
         # Verify that the transaction is not a Double spending
         for c_loop in transaction.coins:
@@ -84,11 +87,13 @@ class Scrooge:
                 if c_loop in t_loop.coins:
                     if transaction.sender_vk != t_loop.recipient_vk:
                         print("Double spending attack detected. Ignore Transaction.")
+                        print(transaction.get_print())
                         return False
                     break
                 t_loop = t_loop.prev_hash_pt[0]
                 if t_loop is None:
                     print("Double spending attack detected. Ignore Transaction.")
+                    print(transaction.get_print())
                     return False
         return True
     
