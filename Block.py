@@ -9,16 +9,27 @@ class Block:
         self.transactions = []
         self.hash = None
 
-        self._current_id += 1
+        Block._current_id += 1
     
     def add_transaction(self, trans):
-        self._transactions.append(trans)
+        self.transactions.append(trans)
         if len(self.transactions) >= self._capacity:
             return True
         return False
 
-    def __str__(self):
+    def get_print(self):
+        transactions = ''
+        for transaction in self.transactions:
+            transactions += '\t' + transaction.get_print() + '--------\n'
         return 'Block:\t' + str(self.id) + '\n'\
-                + 'Previous:\t' + str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1]) + '\n'\
-                + 'Transactions:\t' + str(self.transactions) + '\n'\
+                + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                + 'Transactions: {\n' + transactions + '}\n'\
                 + 'Hash:\t' + str(self.hash) + '\n'
+                
+    def __str__(self):
+        transactions = ''
+        for transaction in self.transactions:
+            transactions += '\t' + transaction.get_print() + '--------\n'
+        return 'Block:\t' + str(self.id) + '\n'\
+                + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                + 'Transactions: {\n' + transactions + '}\n'

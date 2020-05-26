@@ -20,34 +20,110 @@ In this project, we will design a cryptocurrency similar to ScroogeCoin.
 - You are allowed to use predefined hash and digital signature libraries.
   Mention which libraries you used.
 """
-import Scrooge, User, Ledger
+from Scrooge import Scrooge
+from User import User
+from Ledger import Ledger
+
 import keyboard
+import random 
+import sys
 
 
-def run_simulation():
-    # while(True)
-    # if keyboard.is_pressed(' '):
-    # print('Space is pressed')
-    # break
-
+def run_simulation(DEBUG_MODE):
+    blockchain = Scrooge()
     users = []
-    for i in range(10):
+    for i in range(100):
         user = User()
         users.append(user)
+    
     vks = [user.vk for user in users]
-    blockchain = Scrooge(vks)
-    for i in users:
-        print(user.vk + ':\t' + str(len(user.coins)))
-    blockchain.run()
-    
-    # TODO - MOVED FROM SCROOGE - Create the initial coins
-    for vk in users_vk:
-        self.create_coin_transaction(vk, 10)
 
-    
+    # with open('out.txt', 'w') as f:
+    #     print('message', file=f)
+    # f.close()
+    orig_stdout = sys.stdout
+    f = open('out.txt', 'w')
+    sys.stdout = f
+
+    # TODO - MOVED FROM SCROOGE - Create the initial coins
+    print('Start - Empty Wallets\n----------------------------------\n')
+    for user in users:
+        print(user.vk + ':\t' + str(len(blockchain.ledger._users_coins[user.vk])))
+        print('----------------------------------')
+    print('\n----------------------------------\n')
+    print('The initial 10 coin transactions\n----------------------------------\n')
+    for vk in vks:
+        blockchain.create_coin_transaction(vk, 10)
+    print('\n----------------------------------\n')
+    print('Inital amount of coins per user\n----------------------------------\n')
+    for user in users:
+        print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+    print('\n----------------------------------\n')
+    print('START SIMULATION')
+    print('\n----------------------------------\n')
+
+    while(True):
+        debug_attack = False
+        verification_attack = False
+        if DEBUG_MODE:
+            print("DEBUG MODE: Press Enter for next step. Press 'D' for Double Spending Attack. Press 'O' to generate a transaction on behalf of someone else")
+        while DEBUG_MODE:
+            if keyboard.is_pressed('\n'):
+                break
+            if keyboard.is_pressed(' '):
+                print('Space is pressed')
+                return
+            if keyboard.is_pressed('d'):
+                print('Double Spending Attack')
+                debug_attack = True
+                break
+            if keyboard.is_pressed('o'):
+                print('Attack Verification')
+                verification_attack = True
+                break
+        else:
+            if keyboard.is_pressed(' '):
+                print('Space is pressed')
+                return
+        sender = random.choice(users)
+        sender_vk = sender.vk
+        while True:
+            recipient = random.choice(vks)
+            if sender_vk != recipient:
+                break
+        if len(blockchain.ledger._users_coins[sender_vk]) >= 1:
+            wallet = blockchain.ledger._users_coins[sender_vk]
+            amount = random.randint(1, len(wallet))
+            double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
+            transaction = sender.pay(amount, recipient)
+            if verification_attack:
+                while True:
+                    hack_sender = random.choice(vks)
+                    if hack_sender != transaction.sender_vk:
+                        break
+                transaction.sender_vk = hack_sender
+
+            if transaction:
+                handle = blockchain.handle_payment_transaction(transaction)
+                if not handle and DEBUG_MODE:
+                    for user in users:
+                        print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+                elif double_spending_attack_chance:
+                    recipient = random.choice(vks)
+                    transaction_double = sender.pay(amount, recipient, transaction.coins)
+                    handle = blockchain.handle_payment_transaction(transaction_double)
+                    if not handle and DEBUG_MODE:
+                        for user in users:
+                            print(user.vk + ':\n' + str(len(blockchain.ledger._users_coins[user.vk])))
+            debug_attack = False
+            verification_attack = False
+
+    sys.stdout = orig_stdout
+    f.close()
+
 
 if __name__ == '__main__':
-    run_simulation()
+    run_simulation(DEBUG_MODE=True)
     
     
 # General Notes
