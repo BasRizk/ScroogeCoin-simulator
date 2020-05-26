@@ -26,16 +26,24 @@ from Ledger import Ledger
 
 import keyboard
 import random 
+import sys
 
 
 def run_simulation(DEBUG_MODE):
     blockchain = Scrooge()
     users = []
-    for i in range(10):
+    for i in range(100):
         user = User()
         users.append(user)
     
     vks = [user.vk for user in users]
+
+    # with open('out.txt', 'w') as f:
+    #     print('message', file=f)
+    # f.close()
+    orig_stdout = sys.stdout
+    f = open('out.txt', 'w')
+    sys.stdout = f
 
     # TODO - MOVED FROM SCROOGE - Create the initial coins
     print('Start - Empty Wallets\n----------------------------------\n')
@@ -110,7 +118,8 @@ def run_simulation(DEBUG_MODE):
             debug_attack = False
             verification_attack = False
 
-
+    sys.stdout = orig_stdout
+    f.close()
 
 
 if __name__ == '__main__':
