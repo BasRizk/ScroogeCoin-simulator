@@ -4,7 +4,6 @@ class Transaction:
 
     _current_id = 0
         
-    # TODO GET LEDGER
     def __new__(cls, sender_vk, amount, recipient_vk, coins=None): 
         print("Creating Transaction") 
         # Create transaction only if enough coins available 
