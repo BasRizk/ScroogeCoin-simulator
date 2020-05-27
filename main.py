@@ -123,16 +123,16 @@ def run_simulation(DEBUG_MODE):
 
             if transaction:
                 handle = blockchain.handle_payment_transaction(transaction)
-                if not handle and DEBUG_MODE:
-                    for user in users:
-                        logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
-                elif double_spending_attack_chance:
+                # if not handle and DEBUG_MODE:
+                #     for user in users:
+                #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
+                if double_spending_attack_chance:
                     recipient = random.choice(vks)
                     transaction_double = sender.pay(amount, recipient, transaction.coins)
                     handle = blockchain.handle_payment_transaction(transaction_double)
-                    if not handle and DEBUG_MODE:
-                        for user in users:
-                            logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
+                    # if not handle and DEBUG_MODE:
+                    #     for user in users:
+                    #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
             debug_attack = False
             verification_attack = False
             
