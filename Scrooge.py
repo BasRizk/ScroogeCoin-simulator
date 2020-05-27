@@ -58,8 +58,8 @@ class Scrooge:
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 
-        self._ledger.last_hash_pt = self._current_block.prev_hash_pt
-        self._ledger.last_hash_pt_signed = self._sk.sign((str(self._ledger.last_hash_pt[0]) + str(self._ledger.last_hash_pt[1])).encode('utf-8'))
+        self._ledger._last_hash_pt = self._current_block.prev_hash_pt
+        self._ledger._last_hash_pt_signed = self._sk.sign((str(self._ledger._last_hash_pt[0]) + str(self._ledger._last_hash_pt[1])).encode('utf-8'))
         logging.info(str(self._ledger))
 
     def publish_transaction(self, transaction):
