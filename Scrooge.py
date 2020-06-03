@@ -16,7 +16,6 @@ spending can only happen before the transaction is published.
 
 """
 from hashlib import sha256
-from base64 import b64encode
 from ecdsa import SigningKey, VerifyingKey, NIST384p, BadSignatureError
 
 from Ledger import Ledger
@@ -54,7 +53,21 @@ class Scrooge:
         self._current_block.hash = sha256(str(self._current_block).encode('utf-8')).hexdigest() 
         
         # Upon that command block transactions are executed
-        self._ledger.add_block(self._current_block)
+        # self._ledger.add_block(self._current_block)
+        
+        # Apply Block Transactions (Exchange Coins)
+        for t in block.transactions:
+            consumed_coins = t.coins
+            sender_coins = self._ledger._users_coins[t.sender_vk]
+            left_over_coins =\
+                [c for c in sender_coins if c not in consumed_coins]
+            self._ledger._users_coins[t.sender_vk] = left_over_coins
+            random.shuffle(self._ledger._users_coins[t.sender_vk])
+            self._ledger._users_coins[t.recipient_vk] =\
+                self._ledger._users_coins[t.recipient_vk] + consumed_coins
+            random.shuffle(self._ledger._users_coins[t.recipient_vk])
+        self._ledger._merkle_tree.extend(block.transactions)
+        logging.info("A Block is published")
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 

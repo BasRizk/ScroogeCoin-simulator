@@ -38,20 +38,6 @@ class Ledger:
             blockchain += vk + ':\n' + str(len(coins))
             blockchain += '\n--------------------------------\n'
         return blockchain
-    
-    def add_block(self, block):
-        # Apply Block Transactions (Exchange Coins)
-        for t in block.transactions:
-            consumed_coins = t.coins
-            sender_coins = self._users_coins[t.sender_vk]
-            left_over_coins =\
-                [c for c in sender_coins if c not in consumed_coins]
-            self._users_coins[t.sender_vk] = left_over_coins
-            random.shuffle(self._users_coins[t.sender_vk])
-            self._users_coins[t.recipient_vk] = self._users_coins[t.recipient_vk] + consumed_coins
-            random.shuffle(self._users_coins[t.recipient_vk])
-        self._merkle_tree.extend(block.transactions)
-        logging.info("A Block is published")
         
     @staticmethod       
     def get_coins(user_vk, amount=-1):
