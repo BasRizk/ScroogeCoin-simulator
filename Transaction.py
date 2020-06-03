@@ -23,12 +23,23 @@ class Transaction:
         self.coins = Ledger.get_coins(sender_vk, amount) if coins is None else coins
         Transaction._current_id += 1
 
+    def _prev_hash_pt_str(self):
+        _prev_str = "Previous:\n\t{"
+        if self.prev_hash_pt is not None:
+            for pt in self.prev_hash_pt:
+                _prev_str +=\
+                    '\t\t' + str(pt[0].id) \
+                     + ', ' + str(pt[1]) \
+                     + '\n'
+        _prev_str += '\n\t}'
+        return _prev_str
+    
     def get_print_mini(self):
         coins = ''
         for coin in self.coins:
             coins += str(coin._id) + ','
         return '\tTransaction:\t' + str(self.id) + '\n'\
-                    + '\tPrevious:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                    + self._prev_hash_pt_str() + '\n'\
                     + '\tAmount:\t' + str(self.amount) + '\n'\
                     + '\tCoins:\t{ ' + coins[:-1] + ' }\n'\
                     + '\tFrom:\t' + str(self.sender_vk) + '\n'\
@@ -39,8 +50,9 @@ class Transaction:
         coins = ''
         for coin in self.coins:
             coins += '\t' + str(coin._id) + ': ' + str(coin._signature) + '\n\t--------\n'
+    
         return '\tTransaction:\t' + str(self.id) + '\n'\
-                    + '\tPrevious:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                    + self._prev_hash_pt_str() + '\n'\
                     + '\tAmount:\t' + str(self.amount) + '\n'\
                     + '\tCoins:{\n' + coins + '\t}\n'\
                     + '\tFrom:\t' + str(self.sender_vk) + '\n'\
@@ -52,8 +64,9 @@ class Transaction:
         coins = ''
         for coin in self.coins:
             coins += str(coin._id) + ': ' + str(coin._signature) + '\n--------\n'
+            
         return 'Transaction:\t' + str(self.id) + '\n'\
-                + 'Previous:\t' + ((str(self.prev_hash_pt[0].id) + ', ' + str(self.prev_hash_pt[1])) if self.prev_hash_pt else 'None') + '\n'\
+                + self._prev_hash_pt_str() + '\n'\
                 + 'Amount:\t' + str(self.amount) + '\n'\
                 + 'Coins:{\n' + coins + '}\n'\
                 + 'From:\t' + str(self.sender_vk) + '\n'\

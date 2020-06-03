@@ -48,7 +48,7 @@ class Scrooge:
         self._current_block = Block(None)
         self._current_id = 0
         self._coins = []
-        self._last_transaction_hash_pt = None
+        # self._last_transaction_hash_pt = None
         
     def publish_block(self):
         self._current_block.hash = sha256(str(self._current_block).encode('utf-8')).hexdigest() 
@@ -76,19 +76,10 @@ class Scrooge:
         self._ledger._last_hash_pt_signed = self._sk.sign((str(self._ledger._last_hash_pt[0]) + str(self._ledger._last_hash_pt[1])).encode('utf-8'))
         logging.info(str(self._ledger))
 
-    def publish_transaction(self, transaction, payment=True):
+    def publish_transaction(self, transaction):
         # Publish transaction to the block
         # transaction.prev_hash_pt = self._last_transaction_hash_pt
         transaction.hash = sha256((str(transaction) + str(transaction.signature)).encode('utf-8')).hexdigest()
-        
-        
-        if payment:
-            prev_hash_pts = []
-            for coin in transaction.coins:
-                prev_transaction = self._ledger.get_coin_recent_usage(coin)
-                prev_hash_pts.append((prev_transaction, prev_transaction.hash))
-            transaction.prev_hash_pt = prev_hash_pts
-        
         
         is_full = self._current_block.add_transaction(transaction)
 
@@ -98,29 +89,46 @@ class Scrooge:
 
         if is_full:
             self.publish_block()
+# =============================================================================
+#             Verifications
+# =============================================================================
+    def verify_coins_are_real(self, transaction):
+        # WHILE ADDING HASH PTS OF PREV COINS USAGE
+        # Verify that coins are real
+        prev_hash_pts = []
+        for coin in transaction.coins:
+            prev_transaction = self._ledger.get_coin_recent_usage(coin)
+            if prev_transaction is None:
+                logging.info("Verification failed: Coin does not exist in history probably. Ignore Transaction.")
+                return False
+            prev_hash_pts.append((prev_transaction, prev_transaction.hash))
+        transaction.prev_hash_pt = prev_hash_pts
+        return True
         
-    
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
         try:
             return VerifyingKey.from_string(bytes.fromhex(transaction.sender_vk), curve=NIST384p).verify(bytes.fromhex(transaction.signature), str(transaction).encode('utf-8'), sha256)
         except BadSignatureError:
-            logging.info("Verification failed")
+            logging.info("Verification failed: sender is not the issuer of signature. Ignore Transaction.")
         return False
     
     def verify_no_double_spending(self, transaction):
         # Verify that the transaction is not a Double spending
+        
+        logging.debug("--------------look up---------")
+        logging.debug(transaction.prev_hash_pt)
         for c, pt in zip(transaction.coins, transaction.prev_hash_pt):
             prev_transaction, _ = pt
             proof = self._ledger._merkle_tree.get_proof(prev_transaction)
             
             if not c in prev_transaction.coins or \
                 not Ledger.__instance.verify_leaf_inclusion(prev_transaction, proof):
-                logging.error("Double spending attack (or) Coin does not exist in history probably")
+                logging.error("Verification failed: Double spending attack (or) Coin does not exist in history probably")
                 return False
             
             if transaction.sender_vk != prev_transaction.recipient_vk:
-                logging.info("Double spending attack detected. Ignore Transaction.")
+                logging.info("Verification failed: Double spending attack detected. Ignore Transaction.")
                 logging.info(transaction.get_print())
                 return False
             
@@ -144,7 +152,9 @@ class Scrooge:
         # return True
 
     def handle_payment_transaction(self, transaction):
-        if self.verify_owner(transaction) and self.verify_no_double_spending(transaction):
+        if self.verify_coins_are_real(transaction) and\
+            self.verify_owner(transaction) and\
+            self.verify_no_double_spending(transaction):
             self.publish_transaction(transaction)
             return True
         return False
@@ -155,7 +165,7 @@ class Scrooge:
         transaction = Transaction(self.vk, amount, recipient_vk, self._coins)
         self._coins = []
         transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
-        self.publish_transaction(transaction, payment=False)
+        self.publish_transaction(transaction)
 
 
     def create_coin(self):

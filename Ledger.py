@@ -46,7 +46,7 @@ class Ledger:
                 break
             current_block, _  = current_hash_pt
             
-            for t in current_block.transaction:
+            for t in current_block.transactions:
                 if t.has_coin(coin):
                     return t
                 
