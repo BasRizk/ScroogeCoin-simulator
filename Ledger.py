@@ -1,6 +1,8 @@
 import random 
 import logging
 
+from merklelib import MerkleTree, beautify
+
 class Ledger:
     
     __instance = None
@@ -21,7 +23,7 @@ class Ledger:
         
         self._users_coins = {}
         self._users_coins[scrooge_vk] = []
-        
+        self._merkle_tree = MerkleTree()
 
     def __str__(self):
         block = self._last_hash_pt[0] if self._last_hash_pt else None
@@ -48,6 +50,7 @@ class Ledger:
             random.shuffle(self._users_coins[t.sender_vk])
             self._users_coins[t.recipient_vk] = self._users_coins[t.recipient_vk] + consumed_coins
             random.shuffle(self._users_coins[t.recipient_vk])
+        self._merkle_tree.extend(block.transactions)
         logging.info("A Block is published")
         
     @staticmethod       
@@ -77,4 +80,13 @@ class Ledger:
     def get_last_hash_pts():
         return (Ledger._last_hash_pt_signed, Ledger._last_hash_pt)
     
+    @staticmethod
+    def verify_transaction_existance(transaction):
+        proof = Ledger.__instance._merkle_tree.get_proof(transaction)
+
+        if tree.verify_leaf_inclusion(transaction, proof):
+            return True
+        return False
+        
+        
         
