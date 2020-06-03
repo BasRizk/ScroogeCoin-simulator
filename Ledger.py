@@ -80,15 +80,27 @@ class Ledger:
     
     @staticmethod
     def get_last_hash_pts():
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
         return (Ledger._last_hash_pt_signed, Ledger._last_hash_pt)
     
     @staticmethod
     def verify_transaction_existance(transaction):
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
         proof = Ledger.__instance._merkle_tree.get_proof(transaction)
 
         if Ledger.__instance.verify_leaf_inclusion(transaction, proof):
             return True
         return False
         
+    @staticmethod
+    def print_merkle_tree():
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
+        beautify(Ledger.__instance._merkle_tree)
         
         
