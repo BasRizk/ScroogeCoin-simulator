@@ -32,7 +32,7 @@ def init_logger():
     # logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")    
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(levelname)-5.5s] %(message)s",
+        format="%(msecs): d[%(levelname)-5.5s] %(message)s",
         handlers=[
             logging.FileHandler("debug.log", mode='w'),
             logging.StreamHandler()
