@@ -58,3 +58,8 @@ class Transaction:
                 + 'Coins:{\n' + coins + '}\n'\
                 + 'From:\t' + str(self.sender_vk) + '\n'\
                 + 'To:\t' + str(self.recipient_vk) + '\n'
+                
+    def has_coin(self, coin):
+        if coin in self.coins:
+            return True
+        return False

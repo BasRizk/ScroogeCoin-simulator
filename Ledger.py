@@ -1,4 +1,3 @@
-import random 
 import logging
 
 from merklelib import MerkleTree, beautify
@@ -38,7 +37,24 @@ class Ledger:
             blockchain += vk + ':\n' + str(len(coins))
             blockchain += '\n--------------------------------\n'
         return blockchain
+    
+    def get_coin_recent_usage(self, coin):
         
+        current_hash_pt = self._last_hash_pt
+        while(True):
+            if current_hash_pt is None:
+                break
+            current_block, _  = current_hash_pt
+            
+            for t in current_block.transaction:
+                if t.has_coin(coin):
+                    return t
+                
+            current_hash_pt = current_block.prev_hash_pt
+            
+        return None
+            
+    
     @staticmethod       
     def get_coins(user_vk, amount=-1):
         if Ledger.__instance is None:
@@ -70,7 +86,7 @@ class Ledger:
     def verify_transaction_existance(transaction):
         proof = Ledger.__instance._merkle_tree.get_proof(transaction)
 
-        if tree.verify_leaf_inclusion(transaction, proof):
+        if Ledger.__instance.verify_leaf_inclusion(transaction, proof):
             return True
         return False
         

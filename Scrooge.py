@@ -23,6 +23,7 @@ from Transaction import Transaction
 from Coin import Coin
 from Block import Block
 
+import random
 import logging
 
 class Scrooge:
@@ -56,7 +57,7 @@ class Scrooge:
         # self._ledger.add_block(self._current_block)
         
         # Apply Block Transactions (Exchange Coins)
-        for t in block.transactions:
+        for t in self._current_block.transactions:
             consumed_coins = t.coins
             sender_coins = self._ledger._users_coins[t.sender_vk]
             left_over_coins =\
@@ -66,7 +67,7 @@ class Scrooge:
             self._ledger._users_coins[t.recipient_vk] =\
                 self._ledger._users_coins[t.recipient_vk] + consumed_coins
             random.shuffle(self._ledger._users_coins[t.recipient_vk])
-        self._ledger._merkle_tree.extend(block.transactions)
+        self._ledger._merkle_tree.extend(self._current_block.transactions)
         logging.info("A Block is published")
         
         self._current_block = Block((self._current_block, self._current_block.hash))
@@ -77,18 +78,26 @@ class Scrooge:
 
     def publish_transaction(self, transaction):
         # Publish transaction to the block
-        transaction.prev_hash_pt = self._last_transaction_hash_pt
+        # transaction.prev_hash_pt = self._last_transaction_hash_pt
         transaction.hash = sha256((str(transaction) + str(transaction.signature)).encode('utf-8')).hexdigest()
+        
+        prev_hash_pts = []
+        for coin in transaction.coins:
+            prev_transaction = self._ledger.get_coin_recent_usage()
+            prev_hash_pts.append((prev_transaction, prev_transaction.hash))
+        transaction.prev_hash_pt = prev_hash_pts
+        
+        
         is_full = self._current_block.add_transaction(transaction)
 
-        self._last_transaction_hash_pt = (transaction, transaction.hash)
+        # self._last_transaction_hash_pt = (transaction, transaction.hash)
         
         logging.info(self._current_block.get_print())
 
         if is_full:
             self.publish_block()
         
-
+    
     def verify_owner(self, transaction):
         # Verify that the transaction belongs to the owner
         try:
@@ -96,23 +105,41 @@ class Scrooge:
         except BadSignatureError:
             logging.info("Verification failed")
         return False
+    
     def verify_no_double_spending(self, transaction):
         # Verify that the transaction is not a Double spending
-        for c_loop in transaction.coins:
-            t_loop = self._last_transaction_hash_pt[0]
-            while True:
-                if c_loop in t_loop.coins:
-                    if transaction.sender_vk != t_loop.recipient_vk:
-                        logging.info("Double spending attack detected. Ignore Transaction.")
-                        logging.info(transaction.get_print())
-                        return False
-                    break
-                t_loop = t_loop.prev_hash_pt[0]
-                if t_loop is None:
-                    logging.info("Double spending attack detected. Ignore Transaction.")
-                    logging.info(transaction.get_print())
-                    return False
+        for c, pt in zip(transaction.coins, transaction.prev_hash_pt):
+            prev_transaction, _ = pt
+            proof = self._ledger._merkle_tree.get_proof(prev_transaction)
+            
+            if not c in prev_transaction.coins or \
+                not Ledger.__instance.verify_leaf_inclusion(prev_transaction, proof):
+                logging.error("Double spending attack (or) Coin does not exist in history probably")
+                return False
+            
+            if transaction.sender_vk != prev_transaction.recipient_vk:
+                logging.info("Double spending attack detected. Ignore Transaction.")
+                logging.info(transaction.get_print())
+                return False
+            
         return True
+                
+    
+        # for c_loop in transaction.coins:
+        #     t_loop = self._last_transaction_hash_pt[0]
+        #     while True:
+        #         if c_loop in t_loop.coins:
+        #             if transaction.sender_vk != t_loop.recipient_vk:
+        #                 logging.info("Double spending attack detected. Ignore Transaction.")
+        #                 logging.info(transaction.get_print())
+        #                 return False
+        #             break
+        #         t_loop = t_loop.prev_hash_pt[0]
+        #         if t_loop is None:
+        #             logging.info("Double spending attack detected. Ignore Transaction.")
+        #             logging.info(transaction.get_print())
+        #             return False
+        # return True
 
     def handle_payment_transaction(self, transaction):
         if self.verify_owner(transaction) and self.verify_no_double_spending(transaction):
