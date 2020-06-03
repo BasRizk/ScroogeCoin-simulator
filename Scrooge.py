@@ -76,16 +76,18 @@ class Scrooge:
         self._ledger._last_hash_pt_signed = self._sk.sign((str(self._ledger._last_hash_pt[0]) + str(self._ledger._last_hash_pt[1])).encode('utf-8'))
         logging.info(str(self._ledger))
 
-    def publish_transaction(self, transaction):
+    def publish_transaction(self, transaction, payment=True):
         # Publish transaction to the block
         # transaction.prev_hash_pt = self._last_transaction_hash_pt
         transaction.hash = sha256((str(transaction) + str(transaction.signature)).encode('utf-8')).hexdigest()
         
-        prev_hash_pts = []
-        for coin in transaction.coins:
-            prev_transaction = self._ledger.get_coin_recent_usage()
-            prev_hash_pts.append((prev_transaction, prev_transaction.hash))
-        transaction.prev_hash_pt = prev_hash_pts
+        
+        if payment:
+            prev_hash_pts = []
+            for coin in transaction.coins:
+                prev_transaction = self._ledger.get_coin_recent_usage(coin)
+                prev_hash_pts.append((prev_transaction, prev_transaction.hash))
+            transaction.prev_hash_pt = prev_hash_pts
         
         
         is_full = self._current_block.add_transaction(transaction)
@@ -153,7 +155,7 @@ class Scrooge:
         transaction = Transaction(self.vk, amount, recipient_vk, self._coins)
         self._coins = []
         transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
-        self.publish_transaction(transaction)
+        self.publish_transaction(transaction, payment=False)
 
 
     def create_coin(self):
