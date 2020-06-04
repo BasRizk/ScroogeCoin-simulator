@@ -156,7 +156,7 @@ class Scrooge:
             
             if transaction.sender_vk != prev_transaction.recipient_vk:
                 logging.info("Scrooge :: Verification failed: Double spending attack detected. Ignore Transaction.")
-                # logging.info(transaction.get_print())
+                logging.info(transaction.get_print())
                 return False
         
         logging.info("Scrooge :: No double spending verified.")
@@ -186,8 +186,8 @@ class Scrooge:
         transaction = Transaction(self.vk, amount, recipient_vk, self._coins)
         self._coins = []
         transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
+        logging.info("Scrooge :: created a coin transaction of id %d with an amount of %d" % (transaction.id, amount))
         self.publish_transaction(transaction)
-        logging.info("Scrooge :: created a coin transaction with an amount of %d" % amount)
 
 
     def create_coin(self):
