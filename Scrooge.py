@@ -169,7 +169,7 @@ class Scrooge:
             if not transaction in self._processed_nonconfirmed_transactions:
                 break
             self._ledger._unconfirmed_transactions.append(transaction)
-        
+        logging.debug("Scrooge :: handle transaction with id %d." % transaction.id)
     # def handle_payment_transaction(self, transaction):
         if self.verify_owner(transaction) and\
             self.verify_coins_are_real(transaction) and\
