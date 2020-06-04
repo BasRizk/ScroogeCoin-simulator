@@ -23,6 +23,7 @@ class Ledger:
         self._users_coins = {}
         self._users_coins[scrooge_vk] = []
         self._merkle_tree = MerkleTree()
+        self._unconfirmed_transactions = []
 
     def __str__(self):
         block = self._last_hash_pt[0] if self._last_hash_pt else None
@@ -54,10 +55,48 @@ class Ledger:
             
         return None
             
+    @staticmethod
+    def register_transaction(transaction):
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
+        Ledger.__instance._unconfirmed_transactions.append(transaction)
+        logging.info("Ledger :: Transaction is registered in the Ledger; not yet published")
+    
+    @staticmethod
+    def confirm_transaction(transaction):
+        # Probably confirmation this way is not totally realisitc,
+        # as any user technically can hence delete a registered (broadcasted),
+        # un confirmed transaction before it gets published or the real
+        # recipient recieves it; with the need for it be re-registered, although
+        # enough for controlled simulation
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
+        for t in Ledger.__instance._unconfirmed_transactions:
+            if transaction == t:
+                Ledger.__instance._unconfirmed_transactions.remove(transaction)
+                logging.info("Ledger :: Transaction is confirmed by recipient")
+                return True
+        logging.error("Ledger :: No such transaction exists on the queue")
+        return False
+    
+    @staticmethod
+    def get_incoming_transactions(recipient_vk):
+        if Ledger.__instance is None:
+            logging.error("No Ledger is created")
+            return None
+        coming_transactions = []
+        for t in Ledger.__instance._unconfirmed_transactions:
+            if t.recipient_vk == recipient_vk:
+                coming_transactions.append(t)
+        return coming_transactions
+    
     
     @staticmethod       
     def get_coins(user_vk, amount=-1):
         if Ledger.__instance is None:
+            logging.error("No Ledger is created")
             return None
         available_coins = Ledger.__instance._users_coins[user_vk]
         if len(available_coins) < amount & amount != -1:
@@ -90,10 +129,13 @@ class Ledger:
         if Ledger.__instance is None:
             logging.error("No Ledger is created")
             return None
+        logging.info("Ledger :: Using merkle_trees to verify")
         proof = Ledger.__instance._merkle_tree.get_proof(transaction)
 
-        if Ledger.__instance.verify_leaf_inclusion(transaction, proof):
+        if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction, proof):
+            logging.info("Ledger :: Transaction exists in the blockchain")
             return True
+        logging.error("Ledger :: Transaction does NOT exist in the blockchain")
         return False
         
     @staticmethod

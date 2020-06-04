@@ -27,121 +27,176 @@ from Ledger import Ledger
 import keyboard
 import random 
 import logging
+"""
+=>> Output Format
 
-def init_logger():
-    # logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")    
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(msecs)d : [%(levelname)-5.5s] %(message)s",
-        handlers=[
-            logging.FileHandler("debug.log", mode='w'),
-            logging.StreamHandler()
-        ]
-    )
+❖ Print initially the public key and the amount of coins for each user.
+❖ Scoorge should print the block under construction for each new
+   transaction added (include the transaction details).
+❖ Print the blockchain after a new block is appended.
+❖ Terminate the code using the key ‘Space’.
+❖ Save all the printed data to a text file upon termination
+
+"""
+class Simulator:
     
-    logging.getLogger().setLevel(logging.DEBUG)
-    
-def run_simulation(DEBUG_MODE):
-    init_logger() 
-    
-    blockchain = Scrooge()
-    users = []
-    for i in range(10):
-        user = User()
-        users.append(user)
-    
-    vks = [user.vk for user in users]
+    def __init__(self):
+        self.init_logger() 
         
-    logging.info('Start - Empty Wallets')
-    logging.info('----------------------------------')
-    users_coins_dict = Ledger.view_users()
-    for user in users:
-        logging.info(user.vk + ':\t' + str(len(users_coins_dict[user.vk])))
+        self.scrooge = Scrooge()
+        self.users = []
+        for i in range(10):
+            user = User()
+            self.users.append(user)
+        
+        # self.vks = [user.vk for user in self.users]
+    
+    def init_logger(self):
+        # logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s")    
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(msecs)d : [%(levelname)-5.5s] %(message)s",
+            handlers=[
+                logging.FileHandler("debug.log", mode='w'),
+                logging.StreamHandler()
+            ]
+        )
+        
+        logging.getLogger().setLevel(logging.DEBUG)
+        
+    def run_simulation(self, DEBUG_MODE):
+        
+        logging.info('Start - Empty Wallets')
         logging.info('----------------------------------')
-    logging.info('----------------------------------')
-    
-    logging.info('The initial 10 coin transactions')
-    logging.info('----------------------------------')
-    # Initially each user will have 10 ScroogCoins
-    for vk in vks:
-        blockchain.create_coin_transaction(vk, 10)
-    logging.info('----------------------------------')
-    
-    logging.info('Inital amount of coins per user')
-    logging.info('----------------------------------')
-    users_coins_dict = Ledger.view_users()
-    for user in users:
-        logging.info(user.vk + ':\n' + str(len(users_coins_dict[user.vk])))
-    logging.info('----------------------------------')
-    
-    logging.info('START SIMULATION')
-    logging.info('----------------------------------')
-
-    while(True):
-        debug_attack = False
-        verification_attack = False
-        if DEBUG_MODE:
-            logging.debug("DEBUG MODE: Press Enter for next step. Press 'D' for Double Spending Attack. Press 'O' to generate a transaction on behalf of someone else")
-
-        while DEBUG_MODE:
-            if keyboard.is_pressed('\n'):
-                break
-            if keyboard.is_pressed(' '):
-                logging.debug('Space is pressed')
-                return
-            if keyboard.is_pressed('d'):
-                logging.debug('Double Spending Attack')
-                debug_attack = True
-                break
-            if keyboard.is_pressed('o'):
-                logging.debug('Attack Verification')
-                verification_attack = True
-                break
-        else:
-            if keyboard.is_pressed(' '):
-                logging.debug('Space is pressed')
-                return
+        users_coins_dict = Ledger.view_users()
+        for user in self.users:
+            logging.info(user.vk + ':\t' + str(len(users_coins_dict[user.vk])))
+            logging.info('----------------------------------')
+        logging.info('----------------------------------')
         
-        sender = random.choice(users)
-        sender_vk = sender.vk
-        while True:
-            recipient = random.choice(vks)
-            if sender_vk != recipient:
-                break
+        
+        logging.info('The initial 10 coin transactions')
+        logging.info('----------------------------------')
+        # Initially each user will have 10 ScroogCoins
+        for vk in Ledger.view_users().keys():
+            self.scrooge.create_coin_transaction(vk, 10)
+        logging.info('----------------------------------')
+        
+        
+        logging.info('Inital amount of coins per user')
+        logging.info('----------------------------------')
+        users_coins_dict = Ledger.view_users()
+        for user in self.users:
+            logging.info(user.vk + ':\n' + str(len(users_coins_dict[user.vk])))
+        logging.info('----------------------------------')
+        
+        
+        logging.info('START SIMULATION')
+        logging.info('----------------------------------')
+        while(True):
+            debug_attack = False
+            verification_attack = False
+            if DEBUG_MODE:
+                logging.debug("DEBUG MODE: Press Enter for next step. Press 'D' for Double Spending Attack. Press 'O' to generate a transaction on behalf of someone else")
+    
+            while DEBUG_MODE:
+                if keyboard.is_pressed('\n'):
+                    break
+                if keyboard.is_pressed(' '):
+                    logging.debug('Space is pressed')
+                    return
+                if keyboard.is_pressed('d'):
+                    logging.debug('Double Spending Attack')
+                    debug_attack = True
+                    break
+                if keyboard.is_pressed('o'):
+                    logging.debug('Attack Verification')
+                    verification_attack = True
+                    break
+            else:
+                if keyboard.is_pressed(' '):
+                    logging.debug('Space is pressed')
+                    return
             
-        if len(Ledger.view_users()[sender_vk]) >= 1:
-            wallet = Ledger.view_users()[sender_vk]
-            amount = random.randint(1, len(wallet))
-            double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
-            transaction = sender.pay(amount, recipient)
-            if verification_attack:
-                while True:
-                    hack_sender = random.choice(vks)
-                    if hack_sender != transaction.sender_vk:
-                        break
-                transaction.sender_vk = hack_sender
-
-            if transaction:
-                handle = blockchain.handle_payment_transaction(transaction)
-                # if not handle and DEBUG_MODE:
-                #     for user in users:
-                #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
-                if double_spending_attack_chance:
-                    recipient = random.choice(vks)
-                    transaction_double = sender.pay(amount, recipient, transaction.coins)
-                    handle = blockchain.handle_payment_transaction(transaction_double)
+            sender = random.choice(self.users)
+            sender_vk = sender.vk
+            while True:
+                recipient = random.choice(self.users)
+                # recipient_vk = random.choice(self.vks)
+                recipient_vk = recipient.vk
+                if sender_vk != recipient_vk:
+                    break
+                
+            if len(Ledger.view_users()[sender_vk]) >= 1:
+                wallet = Ledger.view_users()[sender_vk]
+                amount = random.randint(1, len(wallet))
+                double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
+                transaction = sender.pay(amount, recipient_vk)
+                if verification_attack:
+                    while True:
+                        hack_sender = random.choice(list(Ledger.view_users().keys()))
+                        if hack_sender != transaction.sender_vk:
+                            break
+                    transaction.sender_vk = hack_sender
+    
+                if transaction:
+                    # handle = self.scrooge.handle_payment_transaction(transaction)
+                    self.scrooge.handle_next_transaction()
+                    incoming_transactions = recipient.get_incoming_transactions()
+                    recipient.confirm_incoming_transaction(incoming_transactions.pop(),
+                                                           verify= True)
+            
+                    
                     # if not handle and DEBUG_MODE:
                     #     for user in users:
                     #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
-            debug_attack = False
-            verification_attack = False
-            
-    # Release file
-    logging.shutdown()
+                    if double_spending_attack_chance:
+                        recipient = random.choice(self.users)
+                        # recipient_vk = random.choice(self.vks)
+                        recipient_vk = recipient.vk
+                        # transaction_double = 
+                        sender.pay(amount, recipient_vk, transaction.coins)
+                        # handle = self.scrooge.handle_payment_transaction(transaction_double)
+                        
+                        # TODO ask simulator if wanna simulate falling under_double spending attack
+                        user_may_fall_under_double_spending_attack = False
+                        # User confirms without verification before scrooge actually publish
+    
+                        incoming_transactions =\
+                            recipient.get_incoming_transactions()
+                        recipient.confirm_incoming_transaction(
+                            incoming_transactions.pop(),
+                            verify= not user_may_fall_under_double_spending_attack
+                            )
+                        
+                        self.scrooge.handle_next_transaction()
+                        if not user_may_fall_under_double_spending_attack:
+                            incoming_transactions =\
+                                recipient.get_incoming_transactions()
+                            recipient.confirm_incoming_transaction(
+                                incoming_transactions.pop(),
+                                verify= not user_may_fall_under_double_spending_attack
+                                )
+                        # TODO maybe verify manually here using the Ledger if transaction got published
+                        #  and if not and user_may_fall_under_double_spending_attack, then anounce the error
+                        #  in simulation
+                        
+                        
+                        
+                        
+                        # if not handle and DEBUG_MODE:
+                        #     for user in users:
+                        #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
+                debug_attack = False
+                verification_attack = False
+                
+        # Release file
+        logging.shutdown()
 
 
 if __name__ == '__main__':
-    run_simulation(DEBUG_MODE=True)
+    simulator = Simulator()
+    simulator.run_simulation(DEBUG_MODE=True)
     
     
 # General Notes
@@ -181,14 +236,4 @@ if __name__ == '__main__':
 # the blockchain.
 # ❖ Transaction verification using Merkel Tree to make sure that the coins
 # are not spent before by the same user.
-
-
-# Output Format
-
-# ❖ Print initially the public key and the amount of coins for each user.
-# ❖ Scoorge should print the block under construction for each new
-# transaction added (include the transaction details).
-# ❖ Print the blockchain after a new block is appended.
-# ❖ Terminate the code using the key ‘Space’.
-# ❖ Save all the printed data to a text file upon termination
 
