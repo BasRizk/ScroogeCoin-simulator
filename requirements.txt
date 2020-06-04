@@ -1,5 +1,8 @@
+anytree==2.8.0
 ecdsa==0.15
+future-fstrings==1.2.0
 hashutils==0.0.3
 keyboard==0.13.5
+merklelib==1.0
 pycryptodomex==3.9.7
 six==1.15.0
