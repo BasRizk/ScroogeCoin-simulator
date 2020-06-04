@@ -123,7 +123,7 @@ class Scrooge:
             proof = self._ledger._merkle_tree.get_proof(prev_transaction)
             
             if not c in prev_transaction.coins or \
-                not Ledger.__instance.verify_leaf_inclusion(prev_transaction, proof):
+                not self._ledger._merkle_tree.verify_leaf_inclusion(prev_transaction, proof):
                 logging.error("Verification failed: Double spending attack (or) Coin does not exist in history probably")
                 return False
             
@@ -152,8 +152,8 @@ class Scrooge:
         # return True
 
     def handle_payment_transaction(self, transaction):
-        if self.verify_coins_are_real(transaction) and\
-            self.verify_owner(transaction) and\
+        if self.verify_owner(transaction) and\
+            self.verify_coins_are_real(transaction) and\
             self.verify_no_double_spending(transaction):
             self.publish_transaction(transaction)
             return True
