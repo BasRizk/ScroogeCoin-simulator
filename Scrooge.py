@@ -99,7 +99,7 @@ class Scrooge:
 # =============================================================================
     def get_coin_recent_usage(self, coin):
         # Check in current block first
-        for t in self._current_block:
+        for t in self._current_block.transactions:
             if coin in t.coins:
                 return t
         # Otherwise search from published ones
