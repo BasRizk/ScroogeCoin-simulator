@@ -82,6 +82,19 @@ class Simulator:
             self.scrooge.create_coin_transaction(vk, 10)
         logging.info('----------------------------------')
         
+        # logging.info('Users to confirm incoming transactions')
+        # for i, recipient in enumerate(self.users):
+        #     incoming_transactions =\
+        #                 recipient.get_incoming_transactions()
+        #     logging.debug("incoming_transactions of user %d are %d" % (i, len(incoming_transactions)))
+        #     while(len(incoming_transactions) > 0):
+        #         recipient.confirm_incoming_transaction(
+        #                 incoming_transactions.pop(),
+        #                 verify=True
+        #                 )                
+        # logging.info('----------------------------------')
+
+        
         
         logging.info('Inital amount of coins per user')
         logging.info('----------------------------------')
@@ -96,8 +109,13 @@ class Simulator:
         while(True):
             debug_attack = False
             verification_attack = False
+            print_merkle_tree =  False
             if DEBUG_MODE:
-                logging.debug("DEBUG MODE: Press Enter for next step. Press 'D' for Double Spending Attack. Press 'O' to generate a transaction on behalf of someone else")
+                logging.debug("DEBUG MODE: Press Enter for next step." +
+                              " Press 'D' for Double Spending Attack. Press" +
+                              " 'O' to generate a transaction on behalf of " +
+                              "someone else. Press 'M' to print merkle Tree" +
+                              " in CONSOLE")
     
             while DEBUG_MODE:
                 if keyboard.is_pressed('\n'):
@@ -113,10 +131,18 @@ class Simulator:
                     logging.debug('Attack Verification')
                     verification_attack = True
                     break
+                if keyboard.is_pressed('m'):
+                    logging.debug('Merke Tree in console')
+                    print_merkle_tree = True
+                    break
             else:
                 if keyboard.is_pressed(' '):
                     logging.debug('Space is pressed')
                     return
+            
+            if print_merkle_tree:
+                Ledger.print_merkle_tree()
+                continue
             
             sender = random.choice(self.users)
             sender_vk = sender.vk
@@ -133,6 +159,7 @@ class Simulator:
                 double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
                 transaction = sender.pay(amount, recipient_vk)
                 if verification_attack:
+                    logging.info("WARNING :: A verification attack to happen..")
                     while True:
                         hack_sender = random.choice(list(Ledger.view_users().keys()))
                         if hack_sender != transaction.sender_vk:
@@ -143,14 +170,19 @@ class Simulator:
                     # handle = self.scrooge.handle_payment_transaction(transaction)
                     self.scrooge.handle_next_transaction()
                     incoming_transactions = recipient.get_incoming_transactions()
-                    recipient.confirm_incoming_transaction(incoming_transactions.pop(),
-                                                           verify= True)
+                    if incoming_transactions is not None and \
+                        len(incoming_transactions) > 0:
+                        recipient.confirm_incoming_transaction(incoming_transactions.pop(),
+                                                               verify= True)
+                    else:
+                        logging.info("A transaction seems to been dropped.")
             
                     
                     # if not handle and DEBUG_MODE:
                     #     for user in users:
                     #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
                     if double_spending_attack_chance:
+                        logging.info("WARNING :: A double spending attack to happen..")
                         recipient = random.choice(self.users)
                         # recipient_vk = random.choice(self.vks)
                         recipient_vk = recipient.vk
@@ -197,7 +229,7 @@ class Simulator:
 if __name__ == '__main__':
     simulator = Simulator()
     simulator.run_simulation(DEBUG_MODE=True)
-    
+    del simulator
     
 # General Notes
 
