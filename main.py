@@ -64,6 +64,11 @@ class Simulator:
         
         logging.getLogger().setLevel(logging.DEBUG)
         
+    def get_current_users(self):
+        users = list(Ledger.view_users().keys())
+        users.remove(self.scrooge.vk)
+        return users
+    
     def run_simulation(self, DEBUG_MODE):
         
         logging.info('Start - Empty Wallets')
@@ -78,7 +83,7 @@ class Simulator:
         logging.info('The initial 10 coin transactions')
         logging.info('----------------------------------')
         # Initially each user will have 10 ScroogCoins
-        for vk in Ledger.view_users().keys():
+        for vk in self.get_current_users():
             self.scrooge.create_coin_transaction(vk, 10)
         logging.info('----------------------------------')
         
@@ -115,7 +120,7 @@ class Simulator:
                               " Press 'D' for Double Spending Attack. Press" +
                               " 'O' to generate a transaction on behalf of " +
                               "someone else. Press 'M' to print merkle Tree" +
-                              " in CONSOLE")
+                              " in CONSOLE\n\n")
     
             while DEBUG_MODE:
                 if keyboard.is_pressed('\n'):
@@ -161,7 +166,7 @@ class Simulator:
                 if verification_attack:
                     logging.info("WARNING :: A verification attack to happen..")
                     while True:
-                        hack_sender = random.choice(list(Ledger.view_users().keys()))
+                        hack_sender = random.choice(self.get_current_users())
                         if hack_sender != transaction.sender_vk:
                             break
                     transaction.sender_vk = hack_sender

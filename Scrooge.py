@@ -73,14 +73,14 @@ class Scrooge:
             
         transactions_hashes = [t.hash for t in self._current_block.transactions]
         self._ledger._merkle_tree.extend(transactions_hashes)
-        logging.info("Scrooge :: A Block is published, and merkle tree extended.")
-        
+
         self._current_block = Block((self._current_block, self._current_block.hash))
 
         self._ledger._last_hash_pt = self._current_block.prev_hash_pt
         self._ledger._last_hash_pt_signed = self._sk.sign((str(self._ledger._last_hash_pt[0]) + str(self._ledger._last_hash_pt[1])).encode('utf-8'))
         logging.info(str(self._ledger))
-        logging.debug("Scrooge :: a block is just published.")
+        logging.info("Scrooge :: A Block is published, and merkle tree extended.")
+
 
 
     def publish_transaction(self, transaction):
@@ -156,7 +156,7 @@ class Scrooge:
             
             if transaction.sender_vk != prev_transaction.recipient_vk:
                 logging.info("Scrooge :: Verification failed: Double spending attack detected. Ignore Transaction.")
-                logging.info(transaction.get_print())
+                # logging.info(transaction.get_print())
                 return False
         
         logging.info("Scrooge :: No double spending verified.")
