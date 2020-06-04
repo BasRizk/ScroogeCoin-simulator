@@ -130,9 +130,9 @@ class Ledger:
             logging.error("No Ledger is created")
             return None
         logging.info("Ledger :: Using merkle_trees to verify")
-        proof = Ledger.__instance._merkle_tree.get_proof(transaction.hash)
+        proof = Ledger.__instance._merkle_tree.get_proof(transaction)
 
-        if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction.hash, proof):
+        if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction, proof):
             logging.info("Ledger :: Transaction exists in the blockchain")
             return True
         logging.error("Ledger :: Transaction does NOT exist in the blockchain")

@@ -71,8 +71,8 @@ class Scrooge:
                 self._ledger._users_coins[t.recipient_vk] + consumed_coins
             random.shuffle(self._ledger._users_coins[t.recipient_vk])
             
-        transactions_hashes = [t.hash for t in self._current_block.transactions]
-        self._ledger._merkle_tree.extend(transactions_hashes)
+        # transactions_hashes = [t.hash for t in self._current_block.transactions]
+        self._ledger._merkle_tree.extend(self._current_block.transactions)
 
         self._current_block = Block((self._current_block, self._current_block.hash))
 
@@ -100,6 +100,7 @@ class Scrooge:
         if is_full:
             logging.debug("Scrooge :: a block is full, about to be published then..")
             self.publish_block()
+            
 # =============================================================================
 #             Verifications
 # =============================================================================
@@ -144,12 +145,12 @@ class Scrooge:
         # logging.debug(transaction.prev_hash_pt)
         for c, pt in zip(transaction.coins, transaction.prev_hash_pt):
             prev_transaction, _ = pt
-            proof = self._ledger._merkle_tree.get_proof(prev_transaction.hash)
+            proof = self._ledger._merkle_tree.get_proof(prev_transaction)
             
             if not c in prev_transaction.coins:
                 logging.error("Scrooge :: Verification failed: coin ptr not found")
 
-            if (not self._ledger._merkle_tree.verify_leaf_inclusion(prev_transaction.hash, proof)) and \
+            if (not self._ledger._merkle_tree.verify_leaf_inclusion(prev_transaction, proof)) and \
                   (not prev_transaction in self._current_block.transactions):
                 logging.error("Scrooge :: Verification failed: Coin does not exist in history probably")
                 return False
