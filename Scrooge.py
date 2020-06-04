@@ -49,6 +49,7 @@ class Scrooge:
         self._current_id = 0
         self._coins = []
         # self._last_transaction_hash_pt = None
+        self._processed_nonconfirmed_transactions = []
         logging.debug("Scrooge :: I just woke up! ... scrooge initialized.")
 
         
@@ -69,8 +70,10 @@ class Scrooge:
             self._ledger._users_coins[t.recipient_vk] =\
                 self._ledger._users_coins[t.recipient_vk] + consumed_coins
             random.shuffle(self._ledger._users_coins[t.recipient_vk])
-        self._ledger._merkle_tree.extend(self._current_block.transactions)
-        logging.info("A Block is published")
+            
+        transactions_hashes = [t.hash for t in self._current_block.transactions]
+        self._ledger._merkle_tree.extend(transactions_hashes)
+        logging.info("Scrooge :: A Block is published, and merkle tree extended.")
         
         self._current_block = Block((self._current_block, self._current_block.hash))
 
@@ -90,9 +93,12 @@ class Scrooge:
         # self._last_transaction_hash_pt = (transaction, transaction.hash)
         
         logging.info(self._current_block.get_print())
-        logging.debug("Scrooge :: transaction just checked to be published.")
+        
+        logging.debug("Scrooge :: transaction id %d which is #%d in current block just checked to be published." %
+                      (transaction.id, len(self._current_block.transactions)))
+    
         if is_full:
-            logging.debug("Scrooge :: a b")
+            logging.debug("Scrooge :: a block is full, about to be published then..")
             self.publish_block()
 # =============================================================================
 #             Verifications
@@ -138,11 +144,14 @@ class Scrooge:
         # logging.debug(transaction.prev_hash_pt)
         for c, pt in zip(transaction.coins, transaction.prev_hash_pt):
             prev_transaction, _ = pt
-            proof = self._ledger._merkle_tree.get_proof(prev_transaction)
+            proof = self._ledger._merkle_tree.get_proof(prev_transaction.hash)
             
-            if not c in prev_transaction.coins or \
-                not self._ledger._merkle_tree.verify_leaf_inclusion(prev_transaction, proof):
-                logging.error("Scrooge :: Verification failed: Double spending attack (or) Coin does not exist in history probably")
+            if not c in prev_transaction.coins:
+                logging.error("Scrooge :: Verification failed: coin ptr not found")
+
+            if (not self._ledger._merkle_tree.verify_leaf_inclusion(prev_transaction.hash, proof)) and \
+                  (not prev_transaction in self._current_block.transactions):
+                logging.error("Scrooge :: Verification failed: Coin does not exist in history probably")
                 return False
             
             if transaction.sender_vk != prev_transaction.recipient_vk:
@@ -155,16 +164,20 @@ class Scrooge:
 
     def handle_next_transaction(self):
         logging.debug("Scrooge :: about to handle a transaction.")
-        transaction = self._ledger._unconfirmed_transactions.pop(0)
+        while(True):
+            transaction = self._ledger._unconfirmed_transactions.pop(0)
+            if not transaction in self._processed_nonconfirmed_transactions:
+                break
+            self._ledger._unconfirmed_transactions.append(transaction)
+        
     # def handle_payment_transaction(self, transaction):
         if self.verify_owner(transaction) and\
             self.verify_coins_are_real(transaction) and\
             self.verify_no_double_spending(transaction):
-                
             self.publish_transaction(transaction)
             self._ledger._unconfirmed_transactions.append(transaction)
+            self._processed_nonconfirmed_transactions.append(transaction)
             return True
-        
         return False
     
     def create_coin_transaction(self, recipient_vk, amount):
@@ -174,7 +187,7 @@ class Scrooge:
         self._coins = []
         transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
         self.publish_transaction(transaction)
-        logging.info("Scrooge:: created a coin transaction with an amount of %d" % amount)
+        logging.info("Scrooge :: created a coin transaction with an amount of %d" % amount)
 
 
     def create_coin(self):

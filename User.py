@@ -18,7 +18,7 @@ class User:
         if transaction is not None:
             transaction.signature = self._sk.sign(str(transaction).encode('utf-8')).hex()
             transaction.hash = sha256((str(transaction) + str(transaction.signature)).encode('utf-8')).hexdigest()
-            logging.info("User side :: Issued a transaction")
+            logging.info("User side :: Issued a transaction with id %d" % transaction.id)
             Ledger.register_transaction(transaction)
             return transaction
         logging.error("User side :: Not enough coins available")
