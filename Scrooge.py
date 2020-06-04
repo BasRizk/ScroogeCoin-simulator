@@ -92,16 +92,25 @@ class Scrooge:
         logging.info(self._current_block.get_print())
         logging.debug("Scrooge :: transaction just checked to be published.")
         if is_full:
+            logging.debug("Scrooge :: a b")
             self.publish_block()
 # =============================================================================
 #             Verifications
 # =============================================================================
+    def get_coin_recent_usage(self, coin):
+        # Check in current block first
+        for t in self._current_block:
+            if coin in t.coins:
+                return t
+        # Otherwise search from published ones
+        return self._ledger.get_coin_recent_usage(coin)
+    
     def verify_coins_are_real(self, transaction):
         # WHILE ADDING HASH PTS OF PREV COINS USAGE
         # Verify that coins are real
         prev_hash_pts = []
         for coin in transaction.coins:
-            prev_transaction = self._ledger.get_coin_recent_usage(coin)
+            prev_transaction = self.get_coin_recent_usage(coin)
             if prev_transaction is None:
                 logging.info("Scrooge :: Verification failed: Coin does not exist in history probably. Ignore Transaction.")
                 return False
