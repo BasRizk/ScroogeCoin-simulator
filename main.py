@@ -77,7 +77,7 @@ class Simulator:
         users.remove(self.scrooge.vk)
         return users
     
-    def run_simulation(self, DEBUG_MODE):
+    def run_simulation(self, DEBUG_MODE, delay=0.005):
         
         logging.info('Start - Empty Wallets')
         logging.info('----------------------------------')
@@ -250,7 +250,7 @@ class Simulator:
                 verification_attack = False
 
                 if not DEBUG_MODE:
-                    time.sleep(0.005)
+                    time.sleep(delay)
                 
         # Release file
         logging.shutdown()
@@ -258,7 +258,7 @@ class Simulator:
 
 if __name__ == '__main__':
     simulator = Simulator()
-    simulator.run_simulation(DEBUG_MODE=False)
+    simulator.run_simulation(DEBUG_MODE=True, delay=0.005)
     del simulator
     
 # General Notes
