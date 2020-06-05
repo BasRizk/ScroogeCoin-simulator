@@ -1,3 +1,10 @@
+# Developed By
+# Michael Khalil 37-3063
+# Basem Rizk 37-14415
+
+# All external libraries used are in requirements.txt
+
+
 """
 In this project, we will design a cryptocurrency similar to ScroogeCoin. 
 
