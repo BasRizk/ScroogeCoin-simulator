@@ -127,9 +127,9 @@ class Ledger:
             return None
         if verbose:
             logging.info("Ledger :: A user using merkle_trees to verify")
-        proof = Ledger.__instance._merkle_tree.get_proof(transaction.hash)
+        proof = Ledger.__instance._merkle_tree.get_proof(transaction)
 
-        if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction.hash, proof):
+        if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction, proof):
             logging.info("Ledger :: A user using merkle_trees to verify")
             logging.info("Ledger :: Transaction exists in the blockchain")
             return True
