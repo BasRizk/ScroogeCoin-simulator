@@ -23,6 +23,16 @@ class Transaction:
         self.coins = Ledger.get_coins(sender_vk, amount) if coins is None else coins
         Transaction._current_id += 1
 
+    def _prev_hash_pt_str_mini(self):
+        _prev_str = "Previous:\t{ "
+        if self.prev_hash_pt is not None:
+            for pt in self.prev_hash_pt:
+                _prev_str +=\
+                    str(pt[0].id) \
+                     + ','
+        _prev_str = _prev_str[:-1] + ' }'
+        return _prev_str
+    
     def _prev_hash_pt_str(self):
         _prev_str = "Previous:\n\t{"
         if self.prev_hash_pt is not None:
@@ -39,7 +49,7 @@ class Transaction:
         for coin in self.coins:
             coins += str(coin._id) + ','
         return '\tTransaction:\t' + str(self.id) + '\n'\
-                    + self._prev_hash_pt_str() + '\n'\
+                    + self._prev_hash_pt_str_mini() + '\n'\
                     + '\tAmount:\t' + str(self.amount) + '\n'\
                     + '\tCoins:\t{ ' + coins[:-1] + ' }\n'\
                     + '\tFrom:\t' + str(self.sender_vk) + '\n'\

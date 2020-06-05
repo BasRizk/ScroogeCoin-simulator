@@ -27,6 +27,7 @@ from Ledger import Ledger
 import keyboard
 import random 
 import logging
+import time
 """
 =>> Output Format
 
@@ -45,7 +46,7 @@ class Simulator:
         
         self.scrooge = Scrooge()
         self.users = []
-        for i in range(10):
+        for i in range(100):
             user = User()
             self.users.append(user)
         
@@ -161,7 +162,7 @@ class Simulator:
             if len(Ledger.view_users()[sender_vk]) >= 1:
                 wallet = Ledger.view_users()[sender_vk]
                 amount = random.randint(1, len(wallet))
-                double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],[1,20],1) # [1,1] are wights for the choices
+                double_spending_attack_chance = debug_attack if DEBUG_MODE else random.choices([True, False],weights=[1,50],k=1)[0] # 2nd argument are wights for the choices
                 transaction = sender.pay(amount, recipient_vk)
                 if verification_attack:
                     logging.info("WARNING :: A verification attack to happen..")
@@ -187,7 +188,7 @@ class Simulator:
                     #     for user in users:
                     #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
                     if double_spending_attack_chance:
-                        logging.info("WARNING :: A double spending attack to happen..")
+                        logging.info("WARNING :: A double spending attack to happen now on purpose..")
                         recipient = random.choice(self.users)
                         # recipient_vk = random.choice(self.vks)
                         recipient_vk = recipient.vk
@@ -207,13 +208,7 @@ class Simulator:
                             )
                         
                         self.scrooge.handle_next_transaction()
-                        if not user_may_fall_under_double_spending_attack:
-                            incoming_transactions =\
-                                recipient.get_incoming_transactions()
-                            recipient.confirm_incoming_transaction(
-                                incoming_transactions.pop(),
-                                verify= not user_may_fall_under_double_spending_attack
-                                )
+                        
                         # TODO maybe verify manually here using the Ledger if transaction got published
                         #  and if not and user_may_fall_under_double_spending_attack, then anounce the error
                         #  in simulation
@@ -224,8 +219,31 @@ class Simulator:
                         # if not handle and DEBUG_MODE:
                         #     for user in users:
                         #         logging.debug(user.vk + ':\n' + str(len(Ledger.view_users()[user.vk])))
+                
+                confirmation_occured = False
+                for user in self.users:
+                    incoming_transactions =\
+                        user.get_incoming_transactions()
+                    while len(incoming_transactions):
+                        isConfirmed = user.confirm_incoming_transaction(
+                            incoming_transactions.pop(),
+                            verify=True,
+                            verbose=False
+                            )
+                        confirmation_occured = isConfirmed or confirmation_occured
+                
+                if confirmation_occured:
+                    wallets = "\n--------------------------------\n\tWallets\n--------------------------------\n"
+                    for vk, coins in Ledger.view_users().items():
+                        wallets += vk + ':\n' + str(len(coins))
+                        wallets += '\n--------------------------------\n'
+                    logging.info(wallets)
+                
                 debug_attack = False
                 verification_attack = False
+
+                if not DEBUG_MODE:
+                    time.sleep(0.005)
                 
         # Release file
         logging.shutdown()
@@ -233,7 +251,7 @@ class Simulator:
 
 if __name__ == '__main__':
     simulator = Simulator()
-    simulator.run_simulation(DEBUG_MODE=True)
+    simulator.run_simulation(DEBUG_MODE=False)
     del simulator
     
 # General Notes

@@ -7,11 +7,15 @@ from Ledger import Ledger
 import logging
 
 class User:
+
+    _current_id = 0
     
     def __init__(self):
+        self._id = self._current_id
         self._sk = SigningKey.generate(curve=NIST384p, hashfunc=sha256)
         self.vk = self._sk.verifying_key.to_string().hex()
         Ledger.add_user(self.vk)
+        User._current_id += 1
 
     def pay(self, amount, recipient_vk, coins=None):
         transaction = Transaction(self.vk, amount, recipient_vk, coins)
@@ -33,18 +37,21 @@ class User:
     def get_incoming_transactions(self):
         return Ledger.get_incoming_transactions(self.vk)
     
-    def confirm_incoming_transaction(self, transaction, verify=True):
+    def confirm_incoming_transaction(self, transaction, verify=True, verbose=True):
         # TODO maybe update balance at user-end accordingly
-        logging.info("Recipient side :: about to confirm an incoming transaction..")
-        if verify and Ledger.verify_transaction_existance(transaction):
-            logging.info("Recipient side :: accept incoming transaction; verification succeded.")
+        if verbose:
+            logging.info("Recipient side :: about to confirm an incoming transaction..")
+        if verify and Ledger.verify_transaction_existance(transaction, verbose):
             Ledger.confirm_transaction(transaction)
+            logging.info("Recipient side :: User #%d accepted transaction with id %d; verification succeded.\n" % (self._id,transaction.id))
             return True
         elif verify:
-            logging.info("Recipient side :: not accepting incoming transaction; verification failed." )
+            if verbose:
+                logging.info("Recipient side :: not accepting incoming transaction; verification failed.\n" )
             return False
         else:
-            logging.info("Recipient side :: accepted incoming transaction without confirmation")
+            if verbose:
+                logging.info("Recipient side :: accepted incoming transaction without confirmation\n")
             Ledger.confirm_transaction(transaction)
             
             return True

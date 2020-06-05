@@ -33,10 +33,6 @@ class Ledger:
                 break
             blockchain += (block.get_print_mini() + '\n---------------------------------\n')
             block = block.prev_hash_pt[0] if block.prev_hash_pt else None
-        blockchain += "\n--------------------------------\n\tWallets\n--------------------------------\n"
-        for vk, coins in self._users_coins.items():
-            blockchain += vk + ':\n' + str(len(coins))
-            blockchain += '\n--------------------------------\n'
         return blockchain
     
     def get_coin_recent_usage(self, coin):
@@ -76,7 +72,7 @@ class Ledger:
         for t in Ledger.__instance._unconfirmed_transactions:
             if transaction == t:
                 Ledger.__instance._unconfirmed_transactions.remove(transaction)
-                logging.info("Ledger :: Transaction is confirmed by recipient")
+                logging.info("Ledger :: Transaction with id %d is confirmed by recipient" % transaction.id)
                 return True
         logging.error("Ledger :: No such transaction exists on the queue")
         return False
@@ -125,17 +121,20 @@ class Ledger:
         return (Ledger._last_hash_pt_signed, Ledger._last_hash_pt)
     
     @staticmethod
-    def verify_transaction_existance(transaction):
+    def verify_transaction_existance(transaction, verbose=True):
         if Ledger.__instance is None:
             logging.error("No Ledger is created")
             return None
-        logging.info("Ledger :: Using merkle_trees to verify")
+        if verbose:
+            logging.info("Ledger :: A user using merkle_trees to verify")
         proof = Ledger.__instance._merkle_tree.get_proof(transaction.hash)
 
         if Ledger.__instance._merkle_tree.verify_leaf_inclusion(transaction.hash, proof):
+            logging.info("Ledger :: A user using merkle_trees to verify")
             logging.info("Ledger :: Transaction exists in the blockchain")
             return True
-        logging.error("Ledger :: Transaction does NOT exist in the blockchain")
+        if verbose:
+            logging.error("Ledger :: Transaction does NOT exist in the blockchain")
         return False
         
     @staticmethod

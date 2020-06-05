@@ -78,8 +78,8 @@ class Scrooge:
 
         self._ledger._last_hash_pt = self._current_block.prev_hash_pt
         self._ledger._last_hash_pt_signed = self._sk.sign((str(self._ledger._last_hash_pt[0]) + str(self._ledger._last_hash_pt[1])).encode('utf-8'))
-        logging.info(str(self._ledger))
         logging.info("Scrooge :: A Block is published, and merkle tree extended.")
+        logging.info(str(self._ledger))
 
 
 
@@ -91,11 +91,10 @@ class Scrooge:
         is_full = self._current_block.add_transaction(transaction)
 
         # self._last_transaction_hash_pt = (transaction, transaction.hash)
-        
-        logging.info(self._current_block.get_print())
-        
-        logging.debug("Scrooge :: transaction id %d which is #%d in current block just checked to be published." %
+        logging.debug("Scrooge :: transaction id %d was added to current block as #%d." %
                       (transaction.id, len(self._current_block.transactions)))
+
+        logging.info(self._current_block.get_print())
     
         if is_full:
             logging.debug("Scrooge :: a block is full, about to be published then..")
